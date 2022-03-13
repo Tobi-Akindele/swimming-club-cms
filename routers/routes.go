@@ -10,6 +10,11 @@ func setPingRoute(router *gin.Engine) {
 	router.GET("/ping", pingController.PingAPI)
 }
 
+func setAuthRoute(router *gin.Engine) {
+	authController := new(controllers.AuthController)
+	router.POST("/signup", authController.SignUp)
+}
+
 func HandleRequests() *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Logger())
@@ -17,6 +22,7 @@ func HandleRequests() *gin.Engine {
 
 	// Initialize routes
 	setPingRoute(router)
+	setAuthRoute(router)
 
 	return router
 }

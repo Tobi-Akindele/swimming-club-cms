@@ -7,13 +7,11 @@ import (
 )
 
 type Ping struct {
-	Status string `json:"status"`
+	Message string `json:"message"`
 }
 
 func (ping *Ping) PingAPI(ctx *gin.Context) {
-
-	p := Ping{
-		Status: utils.GetEnv(utils.APP_NAME, "SWIMMING-CLUB-CMS") + " is running",
-	}
-	ctx.JSON(http.StatusOK, p)
+	ctx.JSON(http.StatusOK, Ping{
+		Message: utils.GetEnv(utils.APP_NAME, "SWIMMING-CLUB-CMS") + " UP!",
+	})
 }
