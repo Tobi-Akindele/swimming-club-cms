@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/joho/godotenv"
+	"swimming-club-cms-be/repositories/dbInits"
 	"swimming-club-cms-be/routers"
 	"swimming-club-cms-be/utils"
 )
@@ -13,6 +14,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	dbInits.InitializeDB()
 
 	router := routers.HandleRequests()
 	port := utils.GetEnv(utils.PORT, ":8080")
