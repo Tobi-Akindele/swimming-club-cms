@@ -5,21 +5,6 @@ import (
 	"os"
 )
 
-const (
-	APP_NAME            = "APP_NAME"
-	PORT                = "PORT"
-	MONGO_DB_HOST       = "MONGO_DB_HOST"
-	DB                  = "DB"
-	DOB_DATE_FORMAT     = "02-01-2006"
-	JWT_SECRET_KEY      = "JWT_SECRET_KEY"
-	JWT_TOKEN_EXPIRY    = "JWT_TOKEN_EXPIRY"
-	AUTHORIZATION       = "Authorization"
-	USER                = "user"
-	SUPER_ADMIN         = "SUPER ADMIN"
-	SUPER_USER_PASS_KEY = "SUPER_USER_PASS_KEY"
-	USER_PERMISSIONS    = "USER_PERMISSIONS"
-)
-
 func GetEnv(param string, defaultValue string) string {
 	envValue := os.Getenv(param)
 	if len(envValue) == 0 {
@@ -44,7 +29,11 @@ func ConvertRefFieldSliceToStringSlice(refFieldSlice mogo.RefFieldSlice) []strin
 	return result
 }
 
-func HasPermission(permissions map[string]string, permission string) bool {
-	_, ok := permissions[permission]
+func ExtractRefFieldId(refField mogo.RefField) string {
+	return refField.ID.Hex()
+}
+
+func MapContainsKey(iMap map[string]string, key string) bool {
+	_, ok := iMap[key]
 	return ok
 }

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"strings"
 	"swimming-club-cms-be/models"
 	"swimming-club-cms-be/repositories"
 )
@@ -9,7 +10,9 @@ type RoleService struct{}
 
 func (rs *RoleService) CreateRole(roleDto *models.RoleDto) (*models.Role, error) {
 	role := models.Role{}
-	role.Name = roleDto.Name
+	role.Name = strings.ToUpper(roleDto.Name)
+	role.Assignable = roleDto.Assignable
+	role.Updatable = true
 	roleRepository := repositories.RoleRepository{}
 	return roleRepository.SaveRole(&role)
 }
@@ -19,17 +22,13 @@ func (rs *RoleService) GetById(id string) (*models.Role, error) {
 	return roleRepository.FindById(id)
 }
 
-func (rs *RoleService) GetUserRoles(roleIds []string) ([]*models.RoleDto, error) {
-	var roles []*models.RoleDto
+func (rs *RoleService) GetUserRoles(roleIds []string) ([]*models.Role, error) {
+	var roles []*models.Role
 	roleRepository := repositories.RoleRepository{}
 	for idx := range roleIds {
 		role, err := roleRepository.FindById(roleIds[idx])
 		if err == nil {
-			roleDto := &models.RoleDto{
-				Name:      role.Name,
-				Updatable: role.Updatable,
-			}
-			roles = append(roles, roleDto)
+			roles = append(roles, role)
 		}
 	}
 	return roles, nil

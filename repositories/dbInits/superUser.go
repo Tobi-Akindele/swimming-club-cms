@@ -16,7 +16,7 @@ func superUser() *models.User {
 		MiddleName:  "",
 		Password:    utils.GetEnv(utils.SUPER_USER_PASS_KEY, ""),
 		DateOfBirth: time.Now(),
-		UserType:    "ADMIN",
+		UserType:    mogo.RefField{},
 		Admin:       true,
 		Updatable:   false,
 		PhoneNumber: models.Phone{},

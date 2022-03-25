@@ -29,7 +29,7 @@ func (authController *AuthController) SignUp(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
-		ctx.JSON(http.StatusOK, user)
+		ctx.JSON(http.StatusCreated, user)
 	}
 }
 

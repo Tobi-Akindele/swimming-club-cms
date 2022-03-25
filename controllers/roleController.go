@@ -27,6 +27,9 @@ func (rc *RoleController) CreateRole(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
-		ctx.JSON(http.StatusOK, createdRole)
+		ctx.JSON(http.StatusCreated, createdRole)
 	}
 }
+
+//TODO
+// ASSIGN PERMISSIONS TO ROLE

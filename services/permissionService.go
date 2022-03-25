@@ -12,12 +12,12 @@ func (ps *PermissionService) GetAllPermissions() ([]*models.Permission, error) {
 	return permissionRepository.FindAll()
 }
 
-func (ps *PermissionService) GetRolesPermissions(roleIds []string) (map[string]string, error) {
+func (ps *PermissionService) GetRolesPermissions(roles []models.Role) (map[string]string, error) {
 	roleService := RoleService{}
 	permissionRepository := repositories.PermissionRepository{}
 	permissions := map[string]string{}
-	for idx := range roleIds {
-		role, err := roleService.GetById(roleIds[idx])
+	for idx := range roles {
+		role, err := roleService.GetById(roles[idx].ID.Hex())
 		if err == nil {
 			for pIdx := range role.Permissions {
 				permission, err := permissionRepository.FindById(role.Permissions[pIdx].ID.Hex())
