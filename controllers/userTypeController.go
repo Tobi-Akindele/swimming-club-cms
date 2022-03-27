@@ -9,37 +9,34 @@ import (
 	"swimming-club-cms-be/services"
 )
 
-type RoleController struct{}
+type UserTypeController struct{}
 
-func (rc *RoleController) CreateRole(ctx *gin.Context) {
-	var role models.RoleDto
-	if err := ctx.ShouldBindJSON(&role); err != nil {
+func (utc *UserTypeController) CreateUserType(ctx *gin.Context) {
+	var userType models.UserTypeDto
+	if err := ctx.ShouldBindJSON(&userType); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 		return
 	}
-	if errs := validator.Validate(role); errs != nil {
+	if errs := validator.Validate(userType); errs != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: errs.Error()})
 		return
 	}
 
-	roleService := services.RoleService{}
-	createdRole, err := roleService.CreateRole(&role)
+	userTypeService := services.UserTypeService{}
+	createdUserType, err := userTypeService.CreateUserType(&userType)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
-		ctx.JSON(http.StatusCreated, createdRole)
+		ctx.JSON(http.StatusCreated, createdUserType)
 	}
 }
 
-func (rc *RoleController) GetAllRoles(ctx *gin.Context) {
-	roleService := services.RoleService{}
-	roles, err := roleService.GetAllRoles()
+func (utc *UserTypeController) GetAllUserTypes(ctx *gin.Context) {
+	userTypeService := services.UserTypeService{}
+	userTypes, err := userTypeService.GetAllUserTypes()
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
-		ctx.JSON(http.StatusOK, roles)
+		ctx.JSON(http.StatusOK, userTypes)
 	}
 }
-
-//TODO
-// ASSIGN PERMISSIONS TO ROLE

@@ -11,14 +11,13 @@ import (
 
 type TokenGenerator struct{}
 
-func (jtg *TokenGenerator) GenerateToken(user *models.User, roles []*models.RoleDto) (string, error) {
+func (tg *TokenGenerator) GenerateToken(user *models.UserResult) (string, error) {
 	tokenExpiry, _ := strconv.ParseInt(utils.GetEnv(utils.JWT_TOKEN_EXPIRY, ""), 10, 64)
 	claims := &dtos.SignedDetails{
 		Username:   user.Username,
 		Email:      user.Email,
 		UserId:     user.ID.Hex(),
 		Authorized: true,
-		Roles:      roles,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Duration(tokenExpiry) * time.Hour).Unix(),
 		},

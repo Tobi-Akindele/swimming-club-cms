@@ -11,25 +11,30 @@ import (
 var permissionRepository repositories.PermissionRepository
 var roleRepository repositories.RoleRepository
 var userRepository repositories.UserRepository
+var userTypeRepository repositories.UserTypeRepository
 
 func InitializeDB() {
 	loadPermissions()
+	loadDefaultUserTypes()
 	loadSuperAdminRole()
 	loadSuperUser()
 }
 
 func loadPermissions() {
 	log.Println("[+] Loading permissions... [+]")
-	_, err := permissionRepository.SavePermissions(permissions())
-	if err != nil {
-		panic(err)
-	}
+	_, _ = permissionRepository.SavePermissions(permissions())
 	log.Println("[+] Permissions loaded successfully [+]")
+}
+
+func loadDefaultUserTypes() {
+	log.Println("[+] Loading default user types... [+]")
+	_, _ = userTypeRepository.SaveUserTypes(defaultUserTypes())
+	log.Println("[+] Default user types loaded successfully [+]")
 }
 
 func loadSuperAdminRole() {
 	log.Println("[+] Loading super admin role [+]")
-	superRole, _ := roleRepository.FindByName(utils.SUPER_ADMIN)
+	superRole, _ := roleRepository.FindByName(utils.SUPER_ADMIN_ROLE)
 	if superRole == nil {
 		superRole = superAdminRole()
 	}
@@ -47,12 +52,17 @@ func loadSuperAdminRole() {
 
 func loadSuperUser() {
 	log.Println("[+] Loading super user [+]")
-	superRole, _ := roleRepository.FindByName(utils.SUPER_ADMIN)
-	if superRole == nil {
-		panic("super role not found")
+	superRole, err := roleRepository.FindByName(utils.SUPER_ADMIN_ROLE)
+	if err != nil {
+		panic(err)
+	}
+	superUserType, err := userTypeRepository.FindByName(utils.SUPER_USER)
+	if err != nil {
+		panic(err)
 	}
 	su := superUser()
-	su.Roles = append(su.Roles, &mogo.RefField{ID: superRole.ID})
+	su.Role = mogo.RefField{ID: superRole.ID}
+	su.UserType = mogo.RefField{ID: superUserType.ID}
 	_, _ = userRepository.SaveUser(su)
 	log.Println("[+] Super user loaded successfully [+]")
 }

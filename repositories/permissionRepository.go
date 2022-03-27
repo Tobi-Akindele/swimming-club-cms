@@ -28,8 +28,8 @@ func (pr *PermissionRepository) SavePermissions(permissions []*models.Permission
 	for p := range permissions {
 		permissionModel := mogo.NewDoc(permissions[p]).(*models.Permission)
 		err := mogo.Save(permissionModel)
-		if vErr, ok := err.(*mogo.ValidationError); ok {
-			return nil, vErr
+		if _, ok := err.(*mogo.ValidationError); ok {
+			continue
 		}
 		permissions[p] = permissionModel
 	}

@@ -6,7 +6,8 @@ import (
 
 func superAdminRole() *models.Role {
 	return &models.Role{
-		Name:      "SUPER ADMIN",
-		Updatable: false,
+		Name:       "SUPER ADMIN ROLE",
+		Updatable:  false,
+		Assignable: false,
 	}
 }

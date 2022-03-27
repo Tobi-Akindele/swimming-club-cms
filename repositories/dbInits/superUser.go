@@ -11,16 +11,17 @@ func superUser() *models.User {
 	return &models.User{
 		Username:    "SUPERUSER",
 		Email:       "superuser@swimmingclub.com",
-		FirstName:   "SUPER ADMIN",
-		LastName:    "SUPER ADMIN",
+		FirstName:   "SUPER",
+		LastName:    "USER",
 		MiddleName:  "",
 		Password:    utils.GetEnv(utils.SUPER_USER_PASS_KEY, ""),
 		DateOfBirth: time.Now(),
-		UserType:    "ADMIN",
+		UserType:    mogo.RefField{},
 		Admin:       true,
 		Updatable:   false,
-		PhoneNumber: models.Phone{},
-		Address:     models.Address{},
-		Roles:       mogo.RefFieldSlice{},
+		PhoneNumber: "",
+		Address:     "",
+		Role:        mogo.RefField{},
+		Active:      true,
 	}
 }

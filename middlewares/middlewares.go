@@ -8,7 +8,6 @@ import (
 	"swimming-club-cms-be/dtos"
 	"swimming-club-cms-be/services"
 	"swimming-club-cms-be/utils"
-	"time"
 )
 
 func HasAuthority(permission string) gin.HandlerFunc {
@@ -22,6 +21,13 @@ func Authentication(permission string) gin.HandlerFunc {
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{
 				Code:    http.StatusBadRequest,
 				Message: "authorization header is required",
+			})
+			return
+		}
+		if !strings.HasPrefix(authHeader, utils.BEARER) {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{
+				Code:    http.StatusBadRequest,
+				Message: "bearer token is required",
 			})
 			return
 		}
@@ -48,13 +54,6 @@ func Authentication(permission string) gin.HandlerFunc {
 			return
 		}
 		if claims, ok := token.Claims.(*dtos.SignedDetails); ok && token.Valid {
-			if claims.ExpiresAt < time.Now().Local().Unix() {
-				ctx.AbortWithStatusJSON(http.StatusNotFound, dtos.Response{
-					Code:    http.StatusNotFound,
-					Message: "token is expired",
-				})
-				return
-			}
 			userService := services.UserService{}
 			user, err := userService.GetById(claims.UserId)
 			if err != nil {
@@ -65,8 +64,8 @@ func Authentication(permission string) gin.HandlerFunc {
 				return
 			}
 			permissionService := services.PermissionService{}
-			permissions, _ := permissionService.GetRolesPermissions(utils.ConvertRefFieldSliceToStringSlice(user.Roles))
-			if !utils.HasPermission(permissions, permission) {
+			permissions, _ := permissionService.GetRolePermissions(user.Role)
+			if !utils.MapContainsKey(permissions, permission) {
 				ctx.AbortWithStatusJSON(http.StatusForbidden, dtos.Response{
 					Code:    http.StatusForbidden,
 					Message: "access denied",
@@ -82,5 +81,20 @@ func Authentication(permission string) gin.HandlerFunc {
 			})
 			return
 		}
+	}
+}
+
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With, *")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+		c.Next()
 	}
 }

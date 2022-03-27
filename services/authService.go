@@ -3,25 +3,34 @@ package services
 import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"swimming-club-cms-be/dtos"
 	"swimming-club-cms-be/jwt"
 	"swimming-club-cms-be/models"
-	"swimming-club-cms-be/utils"
 )
 
 type AuthService struct{}
 
-func (as *AuthService) AuthenticateUser(user *models.User, password string) (*dtos.AuthResponse, error) {
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
-		return nil, errors.New("username or password is invalid")
-	}
-	jwtTokenGenerator := jwt.TokenGenerator{}
-	roleService := RoleService{}
-	roles, err := roleService.GetUserRoles(utils.ConvertRefFieldSliceToStringSlice(user.Roles))
+func (as *AuthService) AuthenticateUser(login *models.Login) (*dtos.AuthResponse, error) {
+	userService := UserService{}
+	user, err := userService.GetByUsername(login.Username)
 	if err != nil {
 		return nil, err
 	}
-	accessToken, err := jwtTokenGenerator.GenerateToken(user, roles)
+	if !user.Active {
+		return nil, errors.New("kindly activate your account")
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password)); err != nil {
+		log.Println(err)
+		return nil, errors.New("username or password is invalid")
+	}
+	permissionsService := PermissionService{}
+	permissions, err := permissionsService.GetRolePermissions(user.Role)
+	if err != nil {
+		return nil, err
+	}
+	jwtTokenGenerator := jwt.TokenGenerator{}
+	accessToken, err := jwtTokenGenerator.GenerateToken(user)
 	if err != nil {
 		return nil, err
 	}
@@ -33,6 +42,8 @@ func (as *AuthService) AuthenticateUser(user *models.User, password string) (*dt
 		Username:    user.Username,
 		Email:       user.Email,
 		Admin:       user.Admin,
-		Roles:       roles,
+		UserType:    user.UserType,
+		Role:        user.Role,
+		Permissions: permissions,
 	}, nil
 }
