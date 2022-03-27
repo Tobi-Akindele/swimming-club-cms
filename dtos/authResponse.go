@@ -13,6 +13,6 @@ type AuthResponse struct {
 	Email       string            `json:"email"`
 	Admin       bool              `json:"admin"`
 	UserType    models.UserType   `json:"userType"`
-	Roles       []models.Role     `json:"roles"`
+	Role        models.Role       `json:"role"`
 	Permissions map[string]string `json:"permissions"`
 }

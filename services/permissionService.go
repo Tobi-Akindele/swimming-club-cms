@@ -12,6 +12,19 @@ func (ps *PermissionService) GetAllPermissions() ([]*models.Permission, error) {
 	return permissionRepository.FindAll()
 }
 
+func (ps *PermissionService) GetRolePermissions(role models.Role) (map[string]string, error) {
+	permissionRepository := repositories.PermissionRepository{}
+	permissions := map[string]string{}
+	for i := range role.Permissions {
+		permission, err := permissionRepository.FindById(role.Permissions[i].ID.Hex())
+		if err == nil {
+			permissions[permission.Value] = permission.Name
+		}
+	}
+
+	return permissions, nil
+}
+
 func (ps *PermissionService) GetRolesPermissions(roles []models.Role) (map[string]string, error) {
 	roleService := RoleService{}
 	permissionRepository := repositories.PermissionRepository{}

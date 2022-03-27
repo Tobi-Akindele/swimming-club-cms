@@ -68,6 +68,10 @@ func permissions() []*models.Permission {
 			Name:  "GET USER BY EMAIL",
 			Value: "GET_USER_BY_EMAIL",
 		},
+		{
+			Name:  "GET ALL ROLES",
+			Value: "GET_ALL_ROLES",
+		},
 	}
 	return pList
 }

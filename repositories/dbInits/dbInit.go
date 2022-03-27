@@ -61,7 +61,7 @@ func loadSuperUser() {
 		panic(err)
 	}
 	su := superUser()
-	su.Roles = append(su.Roles, &mogo.RefField{ID: superRole.ID})
+	su.Role = mogo.RefField{ID: superRole.ID}
 	su.UserType = mogo.RefField{ID: superUserType.ID}
 	_, _ = userRepository.SaveUser(su)
 	log.Println("[+] Super user loaded successfully [+]")

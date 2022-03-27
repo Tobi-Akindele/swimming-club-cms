@@ -64,7 +64,7 @@ func Authentication(permission string) gin.HandlerFunc {
 				return
 			}
 			permissionService := services.PermissionService{}
-			permissions, _ := permissionService.GetRolesPermissions(user.Roles)
+			permissions, _ := permissionService.GetRolePermissions(user.Role)
 			if !utils.MapContainsKey(permissions, permission) {
 				ctx.AbortWithStatusJSON(http.StatusForbidden, dtos.Response{
 					Code:    http.StatusForbidden,

@@ -12,50 +12,40 @@ func init() {
 
 type User struct {
 	mogo.DocumentModel `bson:",inline" coll:"users"`
-	Username           string             `json:"username" idx:"{username}, unique"`
-	Image              string             `json:"image"`
-	Email              string             `json:"email" idx:"{email}, unique"`
-	FirstName          string             `json:"firstName"`
-	LastName           string             `json:"lastName"`
-	MiddleName         string             `json:"middleName"`
-	Password           string             `json:"password"`
-	DateOfBirth        time.Time          `json:"dateOfBirth"`
-	UserType           mogo.RefField      `json:"userType" ref:"UserType"`
-	Admin              bool               `json:"admin"`
-	Updatable          bool               `json:"updatable"`
-	PhoneNumber        Phone              `json:"phoneNumber"`
-	Address            Address            `json:"address"`
-	Roles              mogo.RefFieldSlice `json:"roles" ref:"Role"`
-}
-type Phone struct {
-	CountryCode string `json:"countryCode"`
-	Number      string `json:"number"`
-}
-type Address struct {
-	PostCode    string `json:"postCode"`
-	HouseNumber string `json:"houseNumber"`
-	Street      string `json:"street"`
-	City        string `json:"city"`
-	State       string `json:"state"`
-	Country     string `json:"country"`
+	Username           string        `json:"username" idx:"{username}, unique"`
+	Image              string        `json:"image"`
+	Email              string        `json:"email" idx:"{email}, unique"`
+	FirstName          string        `json:"firstName"`
+	LastName           string        `json:"lastName"`
+	MiddleName         string        `json:"middleName"`
+	Password           string        `json:"password"`
+	DateOfBirth        time.Time     `json:"dateOfBirth"`
+	UserType           mogo.RefField `json:"userType" ref:"UserType"`
+	Admin              bool          `json:"admin"`
+	Gender             string        `json:"gender"`
+	Updatable          bool          `json:"updatable"`
+	PhoneNumber        string        `json:"phoneNumber"`
+	Address            string        `json:"address"`
+	Role               mogo.RefField `json:"role" ref:"Role"`
+	Active             bool          `json:"active"`
+	ActivationCode     string        `json:"activationCode"`
 }
 
 //goland:noinspection ALL
 type UserDto struct {
-	Username        string   `json:"username" binding:"required" validate:"min=3, max=40, regexp=^[a-zA-Z0-9]*$"`
-	Image           string   `json:"image" binding:"required"`
-	Email           string   `json:"email" binding:"required" validate:"regexp=^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$"`
-	FirstName       string   `json:"firstName" binding:"required" validate:"min2, max=40"`
-	LastName        string   `json:"lastName" binding:"required" validate:"min=2, max=40"`
-	MiddleName      string   `json:"middleName"`
-	Password        string   `json:"password" binding:"required" validate:"min=8"`
-	ConfirmPassword string   `json:"confirmPassword" binding:"required" validate:"min=8"`
-	DateOfBirth     string   `json:"dateOfBirth" binding:"required" validate:"datetime"`
-	UserTypeId      string   `json:"userTypeId" binding:"required" validate:"nonzero"`
-	Admin           bool     `json:"admin"`
-	PhoneNumber     Phone    `json:"phoneNumber"`
-	Address         Address  `json:"address"`
-	Roles           []string `json:"roles" binding:"required" validate:"min=1"`
+	Username    string `json:"username" binding:"required" validate:"min=3, max=40, regexp=^[a-zA-Z0-9._]*$"`
+	Image       string `json:"image" binding:"required"`
+	Email       string `json:"email" binding:"required" validate:"regexp=^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$"`
+	FirstName   string `json:"firstName" binding:"required" validate:"min=2, max=40"`
+	LastName    string `json:"lastName" binding:"required" validate:"min=2, max=40"`
+	MiddleName  string `json:"middleName"`
+	DateOfBirth string `json:"dateOfBirth" binding:"required" validate:"datetime"`
+	UserTypeId  string `json:"userTypeId" binding:"required" validate:"nonzero"`
+	Admin       bool   `json:"admin"`
+	Gender      string `json:"gender" binding:"required" validate:"nonzero"`
+	PhoneNumber string `json:"phoneNumber"`
+	Address     string `json:"address"`
+	RoleId      string `json:"roleId" binding:"required" validate:"nonzero"`
 }
 
 type UserResult struct {
@@ -71,14 +61,22 @@ type UserResult struct {
 	UserType           UserType  `json:"userType"`
 	Admin              bool      `json:"admin"`
 	Updatable          bool      `json:"updatable"`
-	PhoneNumber        Phone     `json:"phoneNumber"`
-	Address            Address   `json:"address"`
-	Roles              []Role    `json:"roles"`
+	PhoneNumber        string    `json:"phoneNumber"`
+	Address            string    `json:"address"`
+	Role               Role      `json:"role"`
+	Active             bool      `json:"active"`
+	ActivationCode     string    `json:"activationCode"`
 }
 
 type Login struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
+}
+
+type SetPassword struct {
+	ActivationCode  string `json:"activationCode" binding:"required" validate:"nonzero"`
+	Password        string `json:"password" binding:"required" validate:"nonzero, min=8"`
+	ConfirmPassword string `json:"confirmPassword" binding:"required" validate:"nonzero, min=8"`
 }
 
 func (u *User) BeforeSave() error {
@@ -88,9 +86,4 @@ func (u *User) BeforeSave() error {
 	}
 	u.Password = string(hash)
 	return err
-}
-
-func (u *User) AfterSave() error {
-	u.Password = ""
-	return nil
 }

@@ -39,17 +39,32 @@ func (authController *AuthController) Login(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 		return
 	}
-	userService := services.UserService{}
-	user, err := userService.GetByUsername(login.Username)
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, dtos.Response{Code: http.StatusNotFound, Message: "User not found"})
-		return
-	}
+
 	authService := services.AuthService{}
-	authUser, err := authService.AuthenticateUser(user, login.Password)
+	authUser, err := authService.AuthenticateUser(&login)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
 		ctx.JSON(http.StatusOK, authUser)
+	}
+}
+
+func (authController *AuthController) SetPassword(ctx *gin.Context) {
+	var setPassword models.SetPassword
+	if err := ctx.ShouldBindJSON(&setPassword); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+		return
+	}
+	if errs := validator.Validate(setPassword); errs != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: errs.Error()})
+		return
+	}
+
+	userService := services.UserService{}
+	err := userService.SetPassword(&setPassword)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+	} else {
+		ctx.JSON(http.StatusOK, dtos.Response{Code: http.StatusOK, Message: "Password set successfully"})
 	}
 }

@@ -44,3 +44,16 @@ func (rr *RoleRepository) FindById(id string) (*models.Role, error) {
 	}
 	return roleDoc, nil
 }
+
+func (rr *RoleRepository) FindAll() ([]*models.Role, error) {
+	conn := db.GetConnection()
+	defer conn.Session.Close()
+
+	roleDoc := mogo.NewDoc(models.Role{}).(*models.Role)
+	var results []*models.Role
+	err := roleDoc.Find(nil).All(&results)
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+}

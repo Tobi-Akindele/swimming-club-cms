@@ -31,5 +31,15 @@ func (rc *RoleController) CreateRole(ctx *gin.Context) {
 	}
 }
 
+func (rc *RoleController) GetAllRoles(ctx *gin.Context) {
+	roleService := services.RoleService{}
+	roles, err := roleService.GetAllRoles()
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+	} else {
+		ctx.JSON(http.StatusOK, roles)
+	}
+}
+
 //TODO
 // ASSIGN PERMISSIONS TO ROLE

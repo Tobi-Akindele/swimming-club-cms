@@ -33,35 +33,35 @@ func (ur *UserRepository) FindByUsername(username string) (*models.UserResult, e
 	}
 	var userResult models.UserResult
 	var userType []models.UserType
-	var roles []models.Role
+	var role []models.Role
 	_ = userDoc.Populate("UserType").Find(bson.M{}).All(&userType)
-	_ = userDoc.Populate("Roles").Find(bson.M{}).All(&roles)
+	_ = userDoc.Populate("Role").Find(bson.M{}).All(&role)
 
 	_ = copier.Copy(&userResult, userDoc)
 	userResult.UserType = userType[0]
-	userResult.Roles = roles
+	userResult.Role = role[0]
 
 	return &userResult, nil
 }
 
-func (ur *UserRepository) FindByEmail(email string) (*models.UserResult, error) {
+func (ur *UserRepository) FindByEmail(username string) (*models.UserResult, error) {
 	conn := db.GetConnection()
 	defer conn.Session.Close()
 
 	userDoc := mogo.NewDoc(models.User{}).(*models.User)
-	err := userDoc.FindOne(bson.M{"email": email}, userDoc)
+	err := userDoc.FindOne(bson.M{"username": username}, userDoc)
 	if err != nil {
 		return nil, err
 	}
 	var userResult models.UserResult
 	var userType []models.UserType
-	var roles []models.Role
+	var role []models.Role
 	_ = userDoc.Populate("UserType").Find(bson.M{}).All(&userType)
-	_ = userDoc.Populate("Roles").Find(bson.M{}).All(&roles)
+	_ = userDoc.Populate("Role").Find(bson.M{}).All(&role)
 
 	_ = copier.Copy(&userResult, userDoc)
 	userResult.UserType = userType[0]
-	userResult.Roles = roles
+	userResult.Role = role[0]
 
 	return &userResult, nil
 }
@@ -77,13 +77,13 @@ func (ur *UserRepository) FindById(id string) (*models.UserResult, error) {
 	}
 	var userResult models.UserResult
 	var userType []models.UserType
-	var roles []models.Role
+	var role []models.Role
 	_ = userDoc.Populate("UserType").Find(bson.M{}).All(&userType)
-	_ = userDoc.Populate("Roles").Find(bson.M{}).All(&roles)
+	_ = userDoc.Populate("Role").Find(bson.M{}).All(&role)
 
 	_ = copier.Copy(&userResult, userDoc)
 	userResult.UserType = userType[0]
-	userResult.Roles = roles
+	userResult.Role = role[0]
 
 	return &userResult, nil
 }
@@ -102,14 +102,27 @@ func (ur *UserRepository) FindAll() ([]*models.UserResult, error) {
 	for idx := range users {
 		var userResult models.UserResult
 		var userType []models.UserType
-		var roles []models.Role
+		var role []models.Role
 		u := mogo.NewDoc(users[idx]).(*models.User)
 		_ = u.Populate("UserType").Find(bson.M{}).All(&userType)
-		_ = u.Populate("Roles").Find(bson.M{}).All(&roles)
+		_ = u.Populate("Role").Find(bson.M{}).All(&role)
 		_ = copier.Copy(&userResult, users[idx])
 		userResult.UserType = userType[0]
-		userResult.Roles = roles
+		userResult.Role = role[0]
 		result[idx] = &userResult
 	}
 	return result, nil
+}
+
+func (ur *UserRepository) FindByActivationCode(activationCode string) (*models.User, error) {
+	conn := db.GetConnection()
+	defer conn.Session.Close()
+
+	userDoc := mogo.NewDoc(models.User{}).(*models.User)
+	err := userDoc.FindOne(bson.M{"activationcode": activationCode}, userDoc)
+	if err != nil {
+		return nil, err
+	}
+
+	return userDoc, nil
 }

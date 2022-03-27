@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"swimming-club-cms-be/dtos"
 	"swimming-club-cms-be/jwt"
 	"swimming-club-cms-be/models"
@@ -10,12 +11,21 @@ import (
 
 type AuthService struct{}
 
-func (as *AuthService) AuthenticateUser(user *models.UserResult, password string) (*dtos.AuthResponse, error) {
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+func (as *AuthService) AuthenticateUser(login *models.Login) (*dtos.AuthResponse, error) {
+	userService := UserService{}
+	user, err := userService.GetByUsername(login.Username)
+	if err != nil {
+		return nil, err
+	}
+	if !user.Active {
+		return nil, errors.New("kindly activate your account")
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password)); err != nil {
+		log.Println(err)
 		return nil, errors.New("username or password is invalid")
 	}
 	permissionsService := PermissionService{}
-	permissions, err := permissionsService.GetRolesPermissions(user.Roles)
+	permissions, err := permissionsService.GetRolePermissions(user.Role)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +43,7 @@ func (as *AuthService) AuthenticateUser(user *models.UserResult, password string
 		Email:       user.Email,
 		Admin:       user.Admin,
 		UserType:    user.UserType,
-		Roles:       user.Roles,
+		Role:        user.Role,
 		Permissions: permissions,
 	}, nil
 }

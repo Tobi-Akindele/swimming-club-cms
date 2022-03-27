@@ -33,3 +33,8 @@ func (rs *RoleService) GetUserRoles(roleIds []string) ([]*models.Role, error) {
 	}
 	return roles, nil
 }
+
+func (rs *RoleService) GetAllRoles() ([]*models.Role, error) {
+	roleRepository := repositories.RoleRepository{}
+	return roleRepository.FindAll()
+}

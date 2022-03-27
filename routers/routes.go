@@ -15,6 +15,7 @@ func setUnAuthenticatedRoutes(router *gin.Engine) {
 	authController := new(controllers.AuthController)
 	router.POST("/signup", authController.SignUp)
 	router.POST("/login", authController.Login)
+	router.POST("/set/password", authController.SetPassword)
 }
 
 func setRoleRoutes(router *gin.Engine) {
@@ -22,6 +23,9 @@ func setRoleRoutes(router *gin.Engine) {
 
 	createRoleRoute := router.Group("/role", middlewares.HasAuthority("CREATE_ROLE"))
 	createRoleRoute.POST("", roleController.CreateRole)
+
+	getAllRoleRoute := router.Group("/roles", middlewares.HasAuthority("GET_ALL_ROLES"))
+	getAllRoleRoute.GET("", roleController.GetAllRoles)
 }
 
 func setPermissionRoutes(router *gin.Engine) {
