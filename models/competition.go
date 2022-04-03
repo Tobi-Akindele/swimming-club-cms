@@ -21,3 +21,11 @@ type CreateCompetition struct {
 	Name string    `json:"name" binding:"required"`
 	Date time.Time `json:"date"`
 }
+
+type CompetitionResult struct {
+	mogo.DocumentModel `bson:",inline"`
+	Name               string    `json:"name"`
+	Date               time.Time `json:"date"`
+	Status             int       `json:"status"`
+	Events             []Event   `json:"events"`
+}

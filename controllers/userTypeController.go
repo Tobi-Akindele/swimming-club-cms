@@ -22,8 +22,8 @@ func (utc *UserTypeController) CreateUserType(ctx *gin.Context) {
 		return
 	}
 
-	userTypeService := services.UserTypeService{}
-	createdUserType, err := userTypeService.CreateUserType(&userType)
+	serviceManager := services.GetServiceManagerInstance()
+	createdUserType, err := serviceManager.GetUserTypeService().CreateUserType(&userType)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
@@ -32,8 +32,8 @@ func (utc *UserTypeController) CreateUserType(ctx *gin.Context) {
 }
 
 func (utc *UserTypeController) GetAllUserTypes(ctx *gin.Context) {
-	userTypeService := services.UserTypeService{}
-	userTypes, err := userTypeService.GetAllUserTypes()
+	serviceManager := services.GetServiceManagerInstance()
+	userTypes, err := serviceManager.GetUserTypeService().GetAllUserTypes()
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {

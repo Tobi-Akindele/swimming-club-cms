@@ -8,10 +8,11 @@ import (
 	"swimming-club-cms-be/utils"
 )
 
-var permissionRepository repositories.PermissionRepository
-var roleRepository repositories.RoleRepository
-var userRepository repositories.UserRepository
-var userTypeRepository repositories.UserTypeRepository
+var repositoryManager = repositories.GetRepositoryManagerInstance()
+var permissionRepository = repositoryManager.GetPermissionRepository()
+var roleRepository = repositoryManager.GetRoleRepository()
+var userRepository = repositoryManager.GetUserRepository()
+var userTypeRepository = repositoryManager.GetUserTypeRepository()
 
 func InitializeDB() {
 	loadPermissions()

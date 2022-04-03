@@ -7,11 +7,11 @@ import (
 	"swimming-club-cms-be/models"
 )
 
-type ClubRepository struct{}
+type clubRepository struct{}
 
-func (cr *ClubRepository) SaveClub(club *models.Club) (*models.Club, error) {
+func (cr *clubRepository) SaveClub(club *models.Club) (*models.Club, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	clubModel := mogo.NewDoc(club).(*models.Club)
 	err := mogo.Save(clubModel)
@@ -21,9 +21,9 @@ func (cr *ClubRepository) SaveClub(club *models.Club) (*models.Club, error) {
 	return clubModel, err
 }
 
-func (cr *ClubRepository) FindById(id string) (*models.Club, error) {
+func (cr *clubRepository) FindById(id string) (*models.Club, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	clubDoc := mogo.NewDoc(models.Club{}).(*models.Club)
 	err := clubDoc.FindOne(bson.M{"_id": bson.ObjectIdHex(id)}, clubDoc)
@@ -33,9 +33,9 @@ func (cr *ClubRepository) FindById(id string) (*models.Club, error) {
 	return clubDoc, nil
 }
 
-func (cr *ClubRepository) FindByMemberId(memberId string) (*models.Club, error) {
+func (cr *clubRepository) FindByMemberId(memberId string) (*models.Club, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	clubDoc := mogo.NewDoc(models.Club{}).(*models.Club)
 	err := clubDoc.FindOne(bson.M{"members._id": bson.ObjectIdHex(memberId)}, clubDoc)
@@ -45,13 +45,13 @@ func (cr *ClubRepository) FindByMemberId(memberId string) (*models.Club, error) 
 	return clubDoc, nil
 }
 
-func (cr *ClubRepository) FindAll() ([]*models.Club, error) {
+func (cr *clubRepository) FindAll() ([]*models.Club, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	clubDoc := mogo.NewDoc(models.Club{}).(*models.Club)
 	var results []*models.Club
-	err := clubDoc.Find(nil).All(&results)
+	err := clubDoc.Find(nil).Q().Sort("-_created").All(&results)
 	if err != nil {
 		return nil, err
 	}

@@ -19,5 +19,10 @@ func GetConnection() *mogo.Connection {
 	if err != nil {
 		panic(err)
 	}
+	mongoDBConnection.Session.SetSyncTimeout(0)
 	return mongoDBConnection
+}
+
+func CloseConnection(conn *mogo.Connection) {
+	conn.Session.Close()
 }

@@ -12,22 +12,23 @@ import (
 	"time"
 )
 
-type UserService struct{}
+type userService struct{}
 
-func (us *UserService) CreateUser(userDto *models.UserDto) (*models.User, error) {
+func (us *userService) CreateUser(userDto *models.UserDto) (*models.User, error) {
 	parsedDOB, err := time.Parse(utils.DOB_DATE_FORMAT, userDto.DateOfBirth)
 	if err != nil {
 		return nil, errors.New("date format does not match yyyy-MM-dd")
 	}
-	userTypeService := UserTypeService{}
+	userTypeService := GetServiceManagerInstance().GetUserTypeService()
 	userType, err := userTypeService.GetById(userDto.UserTypeId)
 	if err != nil {
 		return nil, errors.New("unable to validate user type")
 	} else if !userType.Assignable {
 		return nil, errors.New("user type " + userType.Name + " is not assignable")
 	}
-	roleService := RoleService{}
-	role, err := roleService.GetById(userDto.RoleId)
+	roleService := GetServiceManagerInstance().GetRoleService()
+	rawRole, err := roleService.GetById(userDto.RoleId, false)
+	role, _ := rawRole.(models.Role)
 	if err != nil {
 		return nil, errors.New("unable to validate role")
 	} else if !role.Assignable {
@@ -44,7 +45,7 @@ func (us *UserService) CreateUser(userDto *models.UserDto) (*models.User, error)
 	user.Updatable = true
 	user.Active = false
 	user.ActivationCode = uuid.New().String()
-	userRepository := repositories.UserRepository{}
+	userRepository := repositories.GetRepositoryManagerInstance().GetUserRepository()
 	user, err = userRepository.SaveUser(user)
 	if err != nil {
 		return nil, err
@@ -53,28 +54,28 @@ func (us *UserService) CreateUser(userDto *models.UserDto) (*models.User, error)
 	return user, nil
 }
 
-func (us *UserService) GetByUsername(username string) (*models.UserResult, error) {
-	userRepository := repositories.UserRepository{}
+func (us *userService) GetByUsername(username string) (*models.UserResult, error) {
+	userRepository := repositories.GetRepositoryManagerInstance().GetUserRepository()
 	return userRepository.FindByUsername(username)
 }
 
-func (us *UserService) GetById(id string) (*models.UserResult, error) {
-	userRepository := repositories.UserRepository{}
+func (us *userService) GetById(id string) (*models.UserResult, error) {
+	userRepository := repositories.GetRepositoryManagerInstance().GetUserRepository()
 	return userRepository.FindById(id)
 }
 
-func (us *UserService) GetAllUsers() ([]*models.UserResult, error) {
-	userRepository := repositories.UserRepository{}
+func (us *userService) GetAllUsers() ([]*models.UserResult, error) {
+	userRepository := repositories.GetRepositoryManagerInstance().GetUserRepository()
 	return userRepository.FindAll()
 }
 
-func (us *UserService) GetByEmail(email string) (*models.UserResult, error) {
-	userRepository := repositories.UserRepository{}
+func (us *userService) GetByEmail(email string) (*models.UserResult, error) {
+	userRepository := repositories.GetRepositoryManagerInstance().GetUserRepository()
 	return userRepository.FindByEmail(email)
 }
 
-func (us *UserService) SetPassword(setPassword *models.SetPassword) error {
-	userRepository := repositories.UserRepository{}
+func (us *userService) SetPassword(setPassword *models.SetPassword) error {
+	userRepository := repositories.GetRepositoryManagerInstance().GetUserRepository()
 	user, err := userRepository.FindByActivationCode(setPassword.ActivationCode)
 	if err != nil {
 		return errors.New("unable to verify user")

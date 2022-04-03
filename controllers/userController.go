@@ -10,8 +10,8 @@ import (
 type UserController struct{}
 
 func (uc *UserController) GetAllUsers(ctx *gin.Context) {
-	userService := services.UserService{}
-	users, err := userService.GetAllUsers()
+	serviceManager := services.GetServiceManagerInstance()
+	users, err := serviceManager.GetUserService().GetAllUsers()
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
@@ -21,8 +21,8 @@ func (uc *UserController) GetAllUsers(ctx *gin.Context) {
 
 func (uc *UserController) GetByUsername(ctx *gin.Context) {
 	username := ctx.GetHeader("username")
-	userService := services.UserService{}
-	users, err := userService.GetByUsername(username)
+	serviceManager := services.GetServiceManagerInstance()
+	users, err := serviceManager.GetUserService().GetByUsername(username)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
@@ -32,8 +32,8 @@ func (uc *UserController) GetByUsername(ctx *gin.Context) {
 
 func (uc *UserController) GetByEmail(ctx *gin.Context) {
 	email := ctx.GetHeader("email")
-	userService := services.UserService{}
-	users, err := userService.GetByEmail(email)
+	serviceManager := services.GetServiceManagerInstance()
+	users, err := serviceManager.GetUserService().GetByEmail(email)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {

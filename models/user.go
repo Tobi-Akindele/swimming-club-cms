@@ -60,6 +60,7 @@ type UserResult struct {
 	DateOfBirth        time.Time `json:"dateOfBirth"`
 	UserType           UserType  `json:"userType"`
 	Admin              bool      `json:"admin"`
+	Gender             string    `json:"gender"`
 	Updatable          bool      `json:"updatable"`
 	PhoneNumber        string    `json:"phoneNumber"`
 	Address            string    `json:"address"`

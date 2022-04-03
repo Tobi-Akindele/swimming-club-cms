@@ -7,11 +7,11 @@ import (
 	"swimming-club-cms-be/models"
 )
 
-type UserTypeRepository struct{}
+type userTypeRepository struct{}
 
-func (utr *UserTypeRepository) SaveUserType(userType *models.UserType) (*models.UserType, error) {
+func (utr *userTypeRepository) SaveUserType(userType *models.UserType) (*models.UserType, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	userTypeModel := mogo.NewDoc(userType).(*models.UserType)
 	err := mogo.Save(userTypeModel)
@@ -21,9 +21,9 @@ func (utr *UserTypeRepository) SaveUserType(userType *models.UserType) (*models.
 	return userTypeModel, err
 }
 
-func (utr *UserTypeRepository) SaveUserTypes(userTypes []*models.UserType) ([]*models.UserType, error) {
+func (utr *userTypeRepository) SaveUserTypes(userTypes []*models.UserType) ([]*models.UserType, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	for u := range userTypes {
 		userTypeModel := mogo.NewDoc(userTypes[u]).(*models.UserType)
@@ -36,9 +36,9 @@ func (utr *UserTypeRepository) SaveUserTypes(userTypes []*models.UserType) ([]*m
 	return userTypes, nil
 }
 
-func (utr *UserTypeRepository) FindByName(name string) (*models.UserType, error) {
+func (utr *userTypeRepository) FindByName(name string) (*models.UserType, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	userTypeDoc := mogo.NewDoc(models.UserType{}).(*models.UserType)
 	err := userTypeDoc.FindOne(bson.M{"name": name}, userTypeDoc)
@@ -48,9 +48,9 @@ func (utr *UserTypeRepository) FindByName(name string) (*models.UserType, error)
 	return userTypeDoc, nil
 }
 
-func (utr *UserTypeRepository) FindById(id string) (*models.UserType, error) {
+func (utr *userTypeRepository) FindById(id string) (*models.UserType, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	userTypeDoc := mogo.NewDoc(models.UserType{}).(*models.UserType)
 	err := userTypeDoc.FindOne(bson.M{"_id": bson.ObjectIdHex(id)}, userTypeDoc)
@@ -60,13 +60,13 @@ func (utr *UserTypeRepository) FindById(id string) (*models.UserType, error) {
 	return userTypeDoc, nil
 }
 
-func (utr *UserTypeRepository) FindAll() ([]*models.UserType, error) {
+func (utr *userTypeRepository) FindAll() ([]*models.UserType, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	userTypeDoc := mogo.NewDoc(models.UserType{}).(*models.UserType)
 	var results []*models.UserType
-	err := userTypeDoc.Find(nil).All(&results)
+	err := userTypeDoc.Find(nil).Q().Sort("-_created").All(&results)
 	if err != nil {
 		return nil, err
 	}

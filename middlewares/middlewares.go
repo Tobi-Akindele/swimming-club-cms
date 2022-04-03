@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"swimming-club-cms-be/dtos"
+	"swimming-club-cms-be/models"
 	"swimming-club-cms-be/services"
 	"swimming-club-cms-be/utils"
 )
@@ -54,25 +55,17 @@ func Authentication(permission string) gin.HandlerFunc {
 			return
 		}
 		if claims, ok := token.Claims.(*dtos.SignedDetails); ok && token.Valid {
-			userService := services.UserService{}
-			user, err := userService.GetById(claims.UserId)
-			if err != nil {
-				ctx.AbortWithStatusJSON(http.StatusNotFound, dtos.Response{
-					Code:    http.StatusNotFound,
-					Message: "user not found",
-				})
-				return
-			}
-			permissionService := services.PermissionService{}
-			permissions, _ := permissionService.GetRolePermissions(user.Role)
-			if !utils.MapContainsKey(permissions, permission) {
+			serviceManager := services.GetServiceManagerInstance()
+			rawRole, _ := serviceManager.GetRoleService().GetById(claims.RoleId, true)
+			role, _ := rawRole.(*models.RoleResult)
+			if !utils.MapContainsKey(utils.ConvertPermissionSliceToMap(role.Permissions), permission) {
 				ctx.AbortWithStatusJSON(http.StatusForbidden, dtos.Response{
 					Code:    http.StatusForbidden,
 					Message: "access denied",
 				})
 				return
 			}
-			ctx.Set(utils.USER, user)
+			ctx.Set(utils.USER, claims.UserId)
 			ctx.Next()
 		} else {
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{

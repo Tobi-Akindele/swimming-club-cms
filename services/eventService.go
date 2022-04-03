@@ -9,11 +9,11 @@ import (
 	"swimming-club-cms-be/utils"
 )
 
-type EventService struct{}
+type eventService struct{}
 
-func (es *EventService) CreateEvent(eventDto *models.CreateEvent) (*models.Event, error) {
+func (es *eventService) CreateEvent(eventDto *models.CreateEvent) (*models.Event, error) {
 	event := models.Event{}
-	competitionService := CompetitionService{}
+	competitionService := GetServiceManagerInstance().GetCompetitionService()
 	competition, _ := competitionService.GetById(eventDto.CompetitionId)
 	if competition == nil {
 		return nil, errors.New("competition not found")
@@ -22,7 +22,7 @@ func (es *EventService) CreateEvent(eventDto *models.CreateEvent) (*models.Event
 	if err != nil {
 		return nil, err
 	}
-	eventRepository := repositories.EventRepository{}
+	eventRepository := repositories.GetRepositoryManagerInstance().GetEventRepository()
 	savedEvent, err := eventRepository.SaveEvent(&event)
 	if err != nil {
 		return nil, err
@@ -32,19 +32,19 @@ func (es *EventService) CreateEvent(eventDto *models.CreateEvent) (*models.Event
 	return savedEvent, nil
 }
 
-func (es *EventService) GetById(id string) (*models.Event, error) {
-	eventRepository := repositories.EventRepository{}
+func (es *eventService) GetById(id string) (*models.Event, error) {
+	eventRepository := repositories.GetRepositoryManagerInstance().GetEventRepository()
 	return eventRepository.FindById(id)
 }
 
-func (es *EventService) AddParticipants(participants *models.AddParticipants) (*models.Event, error) {
-	eventRepository := repositories.EventRepository{}
+func (es *eventService) AddParticipants(participants *models.AddParticipants) (*models.Event, error) {
+	eventRepository := repositories.GetRepositoryManagerInstance().GetEventRepository()
 	event, _ := eventRepository.FindById(participants.EventId)
 	if event == nil {
 		return nil, errors.New("event not found")
 	}
 	existingParticipants := utils.ConvertRefFieldSliceToStringMap(event.Participants)
-	userService := UserService{}
+	userService := GetServiceManagerInstance().GetUserService()
 	for idx := range participants.Participants {
 		user, _ := userService.GetById(participants.Participants[idx])
 		if user == nil {

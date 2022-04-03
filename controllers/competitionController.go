@@ -25,8 +25,8 @@ func (cc *CompetitionController) CreateCompetition(ctx *gin.Context) {
 		})
 		return
 	}
-	competitionService := services.CompetitionService{}
-	createdCompetition, err := competitionService.CreateCompetition(&competition)
+	serviceManager := services.GetServiceManagerInstance()
+	createdCompetition, err := serviceManager.GetCompetitionService().CreateCompetition(&competition)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
@@ -36,11 +36,21 @@ func (cc *CompetitionController) CreateCompetition(ctx *gin.Context) {
 
 func (cc *CompetitionController) GetCompetitionById(ctx *gin.Context) {
 	competitionId := ctx.Param("id")
-	competitionService := services.CompetitionService{}
-	competition, err := competitionService.GetById(competitionId)
+	serviceManager := services.GetServiceManagerInstance()
+	competition, err := serviceManager.GetCompetitionService().GetById(competitionId)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
 		ctx.JSON(http.StatusOK, competition)
+	}
+}
+
+func (cc *CompetitionController) GetAllCompetitions(ctx *gin.Context) {
+	serviceManager := services.GetServiceManagerInstance()
+	competitions, err := serviceManager.GetCompetitionService().GetAllCompetitions()
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+	} else {
+		ctx.JSON(http.StatusOK, competitions)
 	}
 }

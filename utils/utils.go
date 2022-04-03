@@ -3,6 +3,7 @@ package utils
 import (
 	"github.com/goonode/mogo"
 	"os"
+	"swimming-club-cms-be/models"
 )
 
 func GetEnv(param string, defaultValue string) string {
@@ -21,6 +22,25 @@ func ConvertRefFieldSliceToStringMap(refFieldSlice mogo.RefFieldSlice) map[strin
 	return result
 }
 
+func RemoveRefFromRefSlice(refSlice mogo.RefFieldSlice, refIds []string) mogo.RefFieldSlice {
+	result := mogo.RefFieldSlice{}
+	for _, refField := range refSlice {
+		if !contains(refIds, refField.ID.Hex()) {
+			result = append(result, &mogo.RefField{ID: refField.ID})
+		}
+	}
+	return result
+}
+
+func contains(elements []string, str string) bool {
+	for _, s := range elements {
+		if str == s {
+			return true
+		}
+	}
+	return false
+}
+
 func ConvertRefFieldSliceToStringSlice(refFieldSlice mogo.RefFieldSlice) []string {
 	result := make([]string, len(refFieldSlice))
 	for refIdx := range refFieldSlice {
@@ -36,4 +56,12 @@ func ExtractRefFieldId(refField mogo.RefField) string {
 func MapContainsKey(iMap map[string]string, key string) bool {
 	_, ok := iMap[key]
 	return ok
+}
+
+func ConvertPermissionSliceToMap(permissionsSrc []models.Permission) map[string]string {
+	permissions := map[string]string{}
+	for i := range permissionsSrc {
+		permissions[permissionsSrc[i].Value] = permissionsSrc[i].Name
+	}
+	return permissions
 }

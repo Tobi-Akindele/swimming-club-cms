@@ -7,11 +7,11 @@ import (
 	"swimming-club-cms-be/models"
 )
 
-type EventRepository struct{}
+type eventRepository struct{}
 
-func (er *EventRepository) SaveEvent(event *models.Event) (*models.Event, error) {
+func (er *eventRepository) SaveEvent(event *models.Event) (*models.Event, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	eventModel := mogo.NewDoc(event).(*models.Event)
 	err := mogo.Save(eventModel)
@@ -21,9 +21,9 @@ func (er *EventRepository) SaveEvent(event *models.Event) (*models.Event, error)
 	return eventModel, err
 }
 
-func (er *EventRepository) FindById(id string) (*models.Event, error) {
+func (er *eventRepository) FindById(id string) (*models.Event, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	eventDoc := mogo.NewDoc(models.Event{}).(*models.Event)
 	err := eventDoc.FindOne(bson.M{"_id": bson.ObjectIdHex(id)}, eventDoc)
