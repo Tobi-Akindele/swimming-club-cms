@@ -9,12 +9,12 @@ import (
 	"swimming-club-cms-be/utils"
 )
 
-type ClubService struct{}
+type clubService struct{}
 
-func (cb *ClubService) CreateClub(clubDto *models.ClubDto) (*models.Club, error) {
+func (cb *clubService) CreateClub(clubDto *models.ClubDto) (*models.Club, error) {
 	club := models.Club{}
-	userService := UserService{}
-	user, err := userService.GetById(clubDto.CoachId)
+	serviceManager := GetServiceManagerInstance()
+	user, err := serviceManager.GetUserService().GetById(clubDto.CoachId)
 	if err != nil {
 		return nil, err
 	} else if user == nil {
@@ -28,24 +28,24 @@ func (cb *ClubService) CreateClub(clubDto *models.ClubDto) (*models.Club, error)
 		return nil, err
 	}
 	club.Coach = mogo.RefField{ID: user.ID}
-	clubRepository := repositories.ClubRepository{}
+	clubRepository := repositories.GetRepositoryManagerInstance().GetClubRepository()
 	return clubRepository.SaveClub(&club)
 }
 
-func (cb *ClubService) GetById(id string) (*models.Club, error) {
-	clubRepository := repositories.ClubRepository{}
+func (cb *clubService) GetById(id string) (*models.Club, error) {
+	clubRepository := repositories.GetRepositoryManagerInstance().GetClubRepository()
 	return clubRepository.FindById(id)
 }
 
-func (cb *ClubService) AddMembers(newMembers *models.AddMember) (*models.Club, error) {
-	clubRepository := repositories.ClubRepository{}
+func (cb *clubService) AddMembers(newMembers *models.AddMember) (*models.Club, error) {
+	clubRepository := repositories.GetRepositoryManagerInstance().GetClubRepository()
 	club, err := clubRepository.FindById(newMembers.ClubId)
 	if err != nil {
 		return nil, err
 	} else if club == nil {
 		return nil, errors.New("club not found")
 	}
-	userService := UserService{}
+	userService := GetServiceManagerInstance().GetUserService()
 	for idx := range newMembers.NewMembers {
 		user, err := userService.GetById(newMembers.NewMembers[idx])
 		if err != nil {
@@ -65,7 +65,7 @@ func (cb *ClubService) AddMembers(newMembers *models.AddMember) (*models.Club, e
 	return clubRepository.SaveClub(club)
 }
 
-func (cb *ClubService) GetAllClubs() ([]*models.Club, error) {
-	clubRepository := repositories.ClubRepository{}
+func (cb *clubService) GetAllClubs() ([]*models.Club, error) {
+	clubRepository := repositories.GetRepositoryManagerInstance().GetClubRepository()
 	return clubRepository.FindAll()
 }

@@ -8,6 +8,7 @@ type SignedDetails struct {
 	Username   string
 	Email      string
 	UserId     string
+	RoleId     string
 	Authorized bool
 	jwt.StandardClaims
 }

@@ -7,11 +7,11 @@ import (
 	"swimming-club-cms-be/models"
 )
 
-type PermissionRepository struct{}
+type permissionRepository struct{}
 
-func (pr *PermissionRepository) SavePermission(permission *models.Permission) (*models.Permission, error) {
+func (pr *permissionRepository) SavePermission(permission *models.Permission) (*models.Permission, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	permissionModel := mogo.NewDoc(permission).(*models.Permission)
 	err := mogo.Save(permissionModel)
@@ -21,9 +21,9 @@ func (pr *PermissionRepository) SavePermission(permission *models.Permission) (*
 	return permissionModel, err
 }
 
-func (pr *PermissionRepository) SavePermissions(permissions []*models.Permission) ([]*models.Permission, error) {
+func (pr *permissionRepository) SavePermissions(permissions []*models.Permission) ([]*models.Permission, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	for p := range permissions {
 		permissionModel := mogo.NewDoc(permissions[p]).(*models.Permission)
@@ -36,9 +36,9 @@ func (pr *PermissionRepository) SavePermissions(permissions []*models.Permission
 	return permissions, nil
 }
 
-func (pr *PermissionRepository) FindAll() ([]*models.Permission, error) {
+func (pr *permissionRepository) FindAll() ([]*models.Permission, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	permissionDoc := mogo.NewDoc(models.Permission{}).(*models.Permission)
 	var results []*models.Permission
@@ -49,9 +49,9 @@ func (pr *PermissionRepository) FindAll() ([]*models.Permission, error) {
 	return results, nil
 }
 
-func (pr *PermissionRepository) FindById(id string) (*models.Permission, error) {
+func (pr *permissionRepository) FindById(id string) (*models.Permission, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	permissionDoc := mogo.NewDoc(models.Permission{}).(*models.Permission)
 	err := permissionDoc.FindOne(bson.M{"_id": bson.ObjectIdHex(id)}, permissionDoc)

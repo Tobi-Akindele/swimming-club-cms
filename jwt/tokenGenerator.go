@@ -17,6 +17,7 @@ func (tg *TokenGenerator) GenerateToken(user *models.UserResult) (string, error)
 		Username:   user.Username,
 		Email:      user.Email,
 		UserId:     user.ID.Hex(),
+		RoleId:     user.Role.ID.Hex(),
 		Authorized: true,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Duration(tokenExpiry) * time.Hour).Unix(),

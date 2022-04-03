@@ -8,11 +8,11 @@ import (
 	"swimming-club-cms-be/models"
 )
 
-type UserRepository struct{}
+type userRepository struct{}
 
-func (ur *UserRepository) SaveUser(user *models.User) (*models.User, error) {
+func (ur *userRepository) SaveUser(user *models.User) (*models.User, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	userModel := mogo.NewDoc(user).(*models.User)
 	err := mogo.Save(userModel)
@@ -22,9 +22,9 @@ func (ur *UserRepository) SaveUser(user *models.User) (*models.User, error) {
 	return userModel, err
 }
 
-func (ur *UserRepository) FindByUsername(username string) (*models.UserResult, error) {
+func (ur *userRepository) FindByUsername(username string) (*models.UserResult, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	userDoc := mogo.NewDoc(models.User{}).(*models.User)
 	err := userDoc.FindOne(bson.M{"username": username}, userDoc)
@@ -38,15 +38,19 @@ func (ur *UserRepository) FindByUsername(username string) (*models.UserResult, e
 	_ = userDoc.Populate("Role").Find(bson.M{}).All(&role)
 
 	_ = copier.Copy(&userResult, userDoc)
-	userResult.UserType = userType[0]
-	userResult.Role = role[0]
+	if len(userType) > 0 {
+		userResult.UserType = userType[0]
+	}
+	if len(role) > 0 {
+		userResult.Role = role[0]
+	}
 
 	return &userResult, nil
 }
 
-func (ur *UserRepository) FindByEmail(username string) (*models.UserResult, error) {
+func (ur *userRepository) FindByEmail(username string) (*models.UserResult, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	userDoc := mogo.NewDoc(models.User{}).(*models.User)
 	err := userDoc.FindOne(bson.M{"username": username}, userDoc)
@@ -60,15 +64,19 @@ func (ur *UserRepository) FindByEmail(username string) (*models.UserResult, erro
 	_ = userDoc.Populate("Role").Find(bson.M{}).All(&role)
 
 	_ = copier.Copy(&userResult, userDoc)
-	userResult.UserType = userType[0]
-	userResult.Role = role[0]
+	if len(userType) > 0 {
+		userResult.UserType = userType[0]
+	}
+	if len(role) > 0 {
+		userResult.Role = role[0]
+	}
 
 	return &userResult, nil
 }
 
-func (ur *UserRepository) FindById(id string) (*models.UserResult, error) {
+func (ur *userRepository) FindById(id string) (*models.UserResult, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	userDoc := mogo.NewDoc(models.User{}).(*models.User)
 	err := userDoc.FindOne(bson.M{"_id": bson.ObjectIdHex(id)}, userDoc)
@@ -78,23 +86,27 @@ func (ur *UserRepository) FindById(id string) (*models.UserResult, error) {
 	var userResult models.UserResult
 	var userType []models.UserType
 	var role []models.Role
-	_ = userDoc.Populate("UserType").Find(bson.M{}).All(&userType)
-	_ = userDoc.Populate("Role").Find(bson.M{}).All(&role)
+	err = userDoc.Populate("UserType").Find(bson.M{}).All(&userType)
+	err = userDoc.Populate("Role").Find(bson.M{}).All(&role)
 
 	_ = copier.Copy(&userResult, userDoc)
-	userResult.UserType = userType[0]
-	userResult.Role = role[0]
+	if len(userType) > 0 {
+		userResult.UserType = userType[0]
+	}
+	if len(role) > 0 {
+		userResult.Role = role[0]
+	}
 
 	return &userResult, nil
 }
 
-func (ur *UserRepository) FindAll() ([]*models.UserResult, error) {
+func (ur *userRepository) FindAll() ([]*models.UserResult, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	userDoc := mogo.NewDoc(models.User{}).(*models.User)
 	var users []*models.User
-	err := userDoc.Find(nil).All(&users)
+	err := userDoc.Find(nil).Q().Sort("-_created").All(&users)
 	if err != nil {
 		return nil, err
 	}
@@ -107,16 +119,20 @@ func (ur *UserRepository) FindAll() ([]*models.UserResult, error) {
 		_ = u.Populate("UserType").Find(bson.M{}).All(&userType)
 		_ = u.Populate("Role").Find(bson.M{}).All(&role)
 		_ = copier.Copy(&userResult, users[idx])
-		userResult.UserType = userType[0]
-		userResult.Role = role[0]
+		if len(userType) > 0 {
+			userResult.UserType = userType[0]
+		}
+		if len(role) > 0 {
+			userResult.Role = role[0]
+		}
 		result[idx] = &userResult
 	}
 	return result, nil
 }
 
-func (ur *UserRepository) FindByActivationCode(activationCode string) (*models.User, error) {
+func (ur *userRepository) FindByActivationCode(activationCode string) (*models.User, error) {
 	conn := db.GetConnection()
-	defer conn.Session.Close()
+	defer db.CloseConnection(conn)
 
 	userDoc := mogo.NewDoc(models.User{}).(*models.User)
 	err := userDoc.FindOne(bson.M{"activationcode": activationCode}, userDoc)

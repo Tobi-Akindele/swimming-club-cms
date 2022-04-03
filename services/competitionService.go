@@ -6,25 +6,30 @@ import (
 	"swimming-club-cms-be/repositories"
 )
 
-type CompetitionService struct{}
+type competitionService struct{}
 
-func (cs *CompetitionService) CreateCompetition(competitionDto *models.CreateCompetition) (*models.Competition, error) {
+func (cs *competitionService) CreateCompetition(competitionDto *models.CreateCompetition) (*models.Competition, error) {
 	competition := models.Competition{}
 	err := copier.Copy(&competition, competitionDto)
 	if err != nil {
 		return nil, err
 	}
 	competition.Status = 0
-	competitionRepository := repositories.CompetitionRepository{}
+	competitionRepository := repositories.GetRepositoryManagerInstance().GetCompetitionRepository()
 	return competitionRepository.SaveCompetition(&competition)
 }
 
-func (cs *CompetitionService) GetById(id string) (*models.Competition, error) {
-	competitionRepository := repositories.CompetitionRepository{}
+func (cs *competitionService) GetById(id string) (*models.Competition, error) {
+	competitionRepository := repositories.GetRepositoryManagerInstance().GetCompetitionRepository()
 	return competitionRepository.FindById(id)
 }
 
-func (cs *CompetitionService) UpdateCompetition(competition *models.Competition) (*models.Competition, error) {
-	competitionRepository := repositories.CompetitionRepository{}
+func (cs *competitionService) UpdateCompetition(competition *models.Competition) (*models.Competition, error) {
+	competitionRepository := repositories.GetRepositoryManagerInstance().GetCompetitionRepository()
 	return competitionRepository.SaveCompetition(competition)
+}
+
+func (cs *competitionService) GetAllCompetitions() ([]*models.CompetitionResult, error) {
+	competitionRepository := repositories.GetRepositoryManagerInstance().GetCompetitionRepository()
+	return competitionRepository.FindAll()
 }

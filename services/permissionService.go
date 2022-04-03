@@ -5,15 +5,15 @@ import (
 	"swimming-club-cms-be/repositories"
 )
 
-type PermissionService struct{}
+type permissionService struct{}
 
-func (ps *PermissionService) GetAllPermissions() ([]*models.Permission, error) {
-	permissionRepository := repositories.PermissionRepository{}
+func (ps *permissionService) GetAllPermissions() ([]*models.Permission, error) {
+	permissionRepository := repositories.GetRepositoryManagerInstance().GetPermissionRepository()
 	return permissionRepository.FindAll()
 }
 
-func (ps *PermissionService) GetRolePermissions(role models.Role) (map[string]string, error) {
-	permissionRepository := repositories.PermissionRepository{}
+func (ps *permissionService) GetRolePermissions(role models.Role) (map[string]string, error) {
+	permissionRepository := repositories.GetRepositoryManagerInstance().GetPermissionRepository()
 	permissions := map[string]string{}
 	for i := range role.Permissions {
 		permission, err := permissionRepository.FindById(role.Permissions[i].ID.Hex())
@@ -25,20 +25,7 @@ func (ps *PermissionService) GetRolePermissions(role models.Role) (map[string]st
 	return permissions, nil
 }
 
-func (ps *PermissionService) GetRolesPermissions(roles []models.Role) (map[string]string, error) {
-	roleService := RoleService{}
-	permissionRepository := repositories.PermissionRepository{}
-	permissions := map[string]string{}
-	for idx := range roles {
-		role, err := roleService.GetById(roles[idx].ID.Hex())
-		if err == nil {
-			for pIdx := range role.Permissions {
-				permission, err := permissionRepository.FindById(role.Permissions[pIdx].ID.Hex())
-				if err == nil {
-					permissions[permission.Value] = permission.Name
-				}
-			}
-		}
-	}
-	return permissions, nil
+func (ps *permissionService) GetById(id string) (*models.Permission, error) {
+	permissionRepository := repositories.GetRepositoryManagerInstance().GetPermissionRepository()
+	return permissionRepository.FindById(id)
 }

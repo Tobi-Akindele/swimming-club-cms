@@ -10,8 +10,8 @@ import (
 type PermissionController struct{}
 
 func (pc *PermissionController) GetAllPermissions(ctx *gin.Context) {
-	permissionService := services.PermissionService{}
-	permissions, err := permissionService.GetAllPermissions()
+	serviceManager := services.GetServiceManagerInstance()
+	permissions, err := serviceManager.GetPermissionService().GetAllPermissions()
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {

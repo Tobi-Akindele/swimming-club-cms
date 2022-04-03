@@ -26,6 +26,21 @@ func setRoleRoutes(router *gin.Engine) {
 
 	getAllRoleRoute := router.Group("/roles", middlewares.HasAuthority("GET_ALL_ROLES"))
 	getAllRoleRoute.GET("", roleController.GetAllRoles)
+
+	getRoleByNameRoute := router.Group("/role/name", middlewares.HasAuthority("GET_ROLE_BY_NAME"))
+	getRoleByNameRoute.GET("", roleController.GetRoleByName)
+
+	getRoleByIdRoute := router.Group("/role/:id", middlewares.HasAuthority("GET_ROLE_BY_ID"))
+	getRoleByIdRoute.GET("", roleController.GetRoleById)
+
+	getRolePermissionsRoute := router.Group("/role/:id/permissions", middlewares.HasAuthority("GET_ROLE_PERMISSIONS"))
+	getRolePermissionsRoute.GET("", roleController.GetRolePermissions)
+
+	assignPermissionsToRoleRoute := router.Group("/assign/permissions", middlewares.HasAuthority("ASSIGN_PERMISSIONS_TO_ROLE"))
+	assignPermissionsToRoleRoute.POST("", roleController.AssignPermissionsToRole)
+
+	removePermissionsFromRoleRoute := router.Group("/remove/permissions", middlewares.HasAuthority("REMOVE_ROLE_PERMISSIONS"))
+	removePermissionsFromRoleRoute.POST("", roleController.RemovePermissionsFromRole)
 }
 
 func setPermissionRoutes(router *gin.Engine) {

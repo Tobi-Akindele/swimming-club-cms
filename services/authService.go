@@ -9,10 +9,10 @@ import (
 	"swimming-club-cms-be/models"
 )
 
-type AuthService struct{}
+type authService struct{}
 
-func (as *AuthService) AuthenticateUser(login *models.Login) (*dtos.AuthResponse, error) {
-	userService := UserService{}
+func (as *authService) AuthenticateUser(login *models.Login) (*dtos.AuthResponse, error) {
+	userService := GetServiceManagerInstance().GetUserService()
 	user, err := userService.GetByUsername(login.Username)
 	if err != nil {
 		return nil, err
@@ -24,11 +24,11 @@ func (as *AuthService) AuthenticateUser(login *models.Login) (*dtos.AuthResponse
 		log.Println(err)
 		return nil, errors.New("username or password is invalid")
 	}
-	permissionsService := PermissionService{}
-	permissions, err := permissionsService.GetRolePermissions(user.Role)
-	if err != nil {
-		return nil, err
-	}
+	//permissionsService := permissionService{}
+	//permissions, err := permissionsService.GetRolePermissions(user.Role)
+	//if err != nil {
+	//	return nil, err
+	//}
 	jwtTokenGenerator := jwt.TokenGenerator{}
 	accessToken, err := jwtTokenGenerator.GenerateToken(user)
 	if err != nil {
@@ -44,6 +44,6 @@ func (as *AuthService) AuthenticateUser(login *models.Login) (*dtos.AuthResponse
 		Admin:       user.Admin,
 		UserType:    user.UserType,
 		Role:        user.Role,
-		Permissions: permissions,
+		//Permissions: permissions,
 	}, nil
 }

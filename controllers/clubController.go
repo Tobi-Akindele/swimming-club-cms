@@ -25,8 +25,8 @@ func (cc *ClubController) CreateClub(ctx *gin.Context) {
 		})
 		return
 	}
-	clubService := services.ClubService{}
-	createdClub, err := clubService.CreateClub(&club)
+	serviceManager := services.GetServiceManagerInstance()
+	createdClub, err := serviceManager.GetClubService().CreateClub(&club)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
@@ -48,8 +48,8 @@ func (cc *ClubController) AddMembers(ctx *gin.Context) {
 		})
 		return
 	}
-	clubService := services.ClubService{}
-	club, err := clubService.AddMembers(&newMembers)
+	serviceManager := services.GetServiceManagerInstance()
+	club, err := serviceManager.GetClubService().AddMembers(&newMembers)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
@@ -59,8 +59,8 @@ func (cc *ClubController) AddMembers(ctx *gin.Context) {
 
 func (cc *ClubController) GetClubById(ctx *gin.Context) {
 	clubId := ctx.Param("id")
-	clubService := services.ClubService{}
-	club, err := clubService.GetById(clubId)
+	serviceManager := services.GetServiceManagerInstance()
+	club, err := serviceManager.GetClubService().GetById(clubId)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
@@ -69,8 +69,8 @@ func (cc *ClubController) GetClubById(ctx *gin.Context) {
 }
 
 func (cc *ClubController) GetAllClubs(ctx *gin.Context) {
-	clubService := services.ClubService{}
-	clubs, err := clubService.GetAllClubs()
+	serviceManager := services.GetServiceManagerInstance()
+	clubs, err := serviceManager.GetClubService().GetAllClubs()
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {

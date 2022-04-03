@@ -25,8 +25,8 @@ func (ec *EventController) CreateEvent(ctx *gin.Context) {
 		})
 		return
 	}
-	eventService := services.EventService{}
-	createdEvent, err := eventService.CreateEvent(&event)
+	serviceManager := services.GetServiceManagerInstance()
+	createdEvent, err := serviceManager.GetEventService().CreateEvent(&event)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
@@ -36,8 +36,8 @@ func (ec *EventController) CreateEvent(ctx *gin.Context) {
 
 func (ec *EventController) GetEventById(ctx *gin.Context) {
 	eventId := ctx.Param("id")
-	eventService := services.EventService{}
-	event, err := eventService.GetById(eventId)
+	serviceManager := services.GetServiceManagerInstance()
+	event, err := serviceManager.GetEventService().GetById(eventId)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
@@ -59,8 +59,8 @@ func (ec *EventController) AddParticipants(ctx *gin.Context) {
 		})
 		return
 	}
-	eventService := services.EventService{}
-	event, err := eventService.AddParticipants(&participants)
+	serviceManager := services.GetServiceManagerInstance()
+	event, err := serviceManager.GetEventService().AddParticipants(&participants)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {

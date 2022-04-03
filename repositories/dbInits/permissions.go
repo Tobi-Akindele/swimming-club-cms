@@ -72,6 +72,30 @@ func permissions() []*models.Permission {
 			Name:  "GET ALL ROLES",
 			Value: "GET_ALL_ROLES",
 		},
+		{
+			Name:  "GET ROLE BY NAME",
+			Value: "GET_ROLE_BY_NAME",
+		},
+		{
+			Name:  "GET ROLE BY ID",
+			Value: "GET_ROLE_BY_ID",
+		},
+		{
+			Name:  "ASSIGN PERMISSIONS TO ROLE",
+			Value: "ASSIGN_PERMISSIONS_TO_ROLE",
+		},
+		{
+			Name:  "REMOVE ROLE PERMISSIONS",
+			Value: "REMOVE_ROLE_PERMISSIONS",
+		},
+		{
+			Name:  "GET ROLE PERMISSIONS",
+			Value: "GET_ROLE_PERMISSIONS",
+		},
+		{
+			Name:  "GET ALL COMPETITIONS",
+			Value: "GET_ALL_COMPETITIONS",
+		},
 	}
 	return pList
 }

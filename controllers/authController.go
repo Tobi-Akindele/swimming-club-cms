@@ -12,7 +12,7 @@ import (
 
 type AuthController struct{}
 
-func (authController *AuthController) SignUp(ctx *gin.Context) {
+func (ac *AuthController) SignUp(ctx *gin.Context) {
 
 	var signup models.UserDto
 	if err := ctx.ShouldBindJSON(&signup); err != nil {
@@ -24,8 +24,8 @@ func (authController *AuthController) SignUp(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: errs.Error()})
 		return
 	}
-	userService := services.UserService{}
-	user, err := userService.CreateUser(&signup)
+	serviceManager := services.GetServiceManagerInstance()
+	user, err := serviceManager.GetUserService().CreateUser(&signup)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
@@ -33,15 +33,14 @@ func (authController *AuthController) SignUp(ctx *gin.Context) {
 	}
 }
 
-func (authController *AuthController) Login(ctx *gin.Context) {
+func (ac *AuthController) Login(ctx *gin.Context) {
 	var login models.Login
 	if err := ctx.ShouldBindJSON(&login); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 		return
 	}
-
-	authService := services.AuthService{}
-	authUser, err := authService.AuthenticateUser(&login)
+	serviceManager := services.GetServiceManagerInstance()
+	authUser, err := serviceManager.GetAuthService().AuthenticateUser(&login)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
@@ -49,7 +48,7 @@ func (authController *AuthController) Login(ctx *gin.Context) {
 	}
 }
 
-func (authController *AuthController) SetPassword(ctx *gin.Context) {
+func (ac *AuthController) SetPassword(ctx *gin.Context) {
 	var setPassword models.SetPassword
 	if err := ctx.ShouldBindJSON(&setPassword); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
@@ -60,8 +59,8 @@ func (authController *AuthController) SetPassword(ctx *gin.Context) {
 		return
 	}
 
-	userService := services.UserService{}
-	err := userService.SetPassword(&setPassword)
+	serviceManager := services.GetServiceManagerInstance()
+	err := serviceManager.GetUserService().SetPassword(&setPassword)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {

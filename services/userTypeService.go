@@ -7,9 +7,9 @@ import (
 	"swimming-club-cms-be/repositories"
 )
 
-type UserTypeService struct{}
+type userTypeService struct{}
 
-func (uts *UserTypeService) CreateUserType(userTypeDto *models.UserTypeDto) (*models.UserType, error) {
+func (uts *userTypeService) CreateUserType(userTypeDto *models.UserTypeDto) (*models.UserType, error) {
 	userType := &models.UserType{}
 	err := copier.Copy(userType, userTypeDto)
 	if err != nil {
@@ -17,16 +17,16 @@ func (uts *UserTypeService) CreateUserType(userTypeDto *models.UserTypeDto) (*mo
 	}
 	userType.Name = strings.ToUpper(userType.Name)
 	userType.Updatable = true
-	userTypeRepository := repositories.UserTypeRepository{}
+	userTypeRepository := repositories.GetRepositoryManagerInstance().GetUserTypeRepository()
 	return userTypeRepository.SaveUserType(userType)
 }
 
-func (uts *UserTypeService) GetById(id string) (*models.UserType, error) {
-	userTypeRepository := repositories.UserTypeRepository{}
+func (uts *userTypeService) GetById(id string) (*models.UserType, error) {
+	userTypeRepository := repositories.GetRepositoryManagerInstance().GetUserTypeRepository()
 	return userTypeRepository.FindById(id)
 }
 
-func (uts *UserTypeService) GetAllUserTypes() ([]*models.UserType, error) {
-	userTypeRepository := repositories.UserTypeRepository{}
+func (uts *userTypeService) GetAllUserTypes() ([]*models.UserType, error) {
+	userTypeRepository := repositories.GetRepositoryManagerInstance().GetUserTypeRepository()
 	return userTypeRepository.FindAll()
 }
