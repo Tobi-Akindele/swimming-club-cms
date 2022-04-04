@@ -74,7 +74,7 @@ func (ur *userRepository) FindByEmail(username string) (*models.UserResult, erro
 	return &userResult, nil
 }
 
-func (ur *userRepository) FindById(id string) (*models.UserResult, error) {
+func (ur *userRepository) FindById(id string, fetchRelationShips bool) (interface{}, error) {
 	conn := db.GetConnection()
 	defer db.CloseConnection(conn)
 
@@ -83,21 +83,22 @@ func (ur *userRepository) FindById(id string) (*models.UserResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	var userResult models.UserResult
-	var userType []models.UserType
-	var role []models.Role
-	err = userDoc.Populate("UserType").Find(bson.M{}).All(&userType)
-	err = userDoc.Populate("Role").Find(bson.M{}).All(&role)
-
-	_ = copier.Copy(&userResult, userDoc)
-	if len(userType) > 0 {
-		userResult.UserType = userType[0]
+	if fetchRelationShips {
+		var userResult models.UserResult
+		var userType []models.UserType
+		var role []models.Role
+		err = userDoc.Populate("UserType").Find(bson.M{}).All(&userType)
+		err = userDoc.Populate("Role").Find(bson.M{}).All(&role)
+		_ = copier.Copy(&userResult, userDoc)
+		if len(userType) > 0 {
+			userResult.UserType = userType[0]
+		}
+		if len(role) > 0 {
+			userResult.Role = role[0]
+		}
+		return &userResult, nil
 	}
-	if len(role) > 0 {
-		userResult.Role = role[0]
-	}
-
-	return &userResult, nil
+	return userDoc, nil
 }
 
 func (ur *userRepository) FindAll() ([]*models.UserResult, error) {

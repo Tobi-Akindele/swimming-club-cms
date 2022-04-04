@@ -96,6 +96,14 @@ func permissions() []*models.Permission {
 			Name:  "GET ALL COMPETITIONS",
 			Value: "GET_ALL_COMPETITIONS",
 		},
+		{
+			Name:  "UPDATE USER",
+			Value: "UPDATE_USER",
+		},
+		{
+			Name:  "DELETE COMPETITION",
+			Value: "DELETE_COMPETITION",
+		},
 	}
 	return pList
 }

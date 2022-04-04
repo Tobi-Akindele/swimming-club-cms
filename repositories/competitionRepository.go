@@ -58,3 +58,33 @@ func (cr *competitionRepository) FindAll() ([]*models.CompetitionResult, error) 
 	}
 	return result, nil
 }
+
+func (cr *competitionRepository) FindByName(name string) (*models.Competition, error) {
+	conn := db.GetConnection()
+	defer db.CloseConnection(conn)
+
+	competitionDoc := mogo.NewDoc(models.Competition{}).(*models.Competition)
+	err := competitionDoc.FindOne(bson.M{"name": name}, competitionDoc)
+	if err != nil {
+		return nil, err
+	}
+	return competitionDoc, nil
+}
+
+func (cr *competitionRepository) DeleteCompetitions(deletions []*models.Competition) []error {
+	conn := db.GetConnection()
+	defer db.CloseConnection(conn)
+
+	var errors []error
+	for _, competition := range deletions {
+		doc := mogo.NewDoc(competition).(*models.Competition)
+		err := doc.Remove()
+		if err != nil {
+			errors = append(errors, err)
+		}
+	}
+	if len(errors) > 0 {
+		return errors
+	}
+	return nil
+}

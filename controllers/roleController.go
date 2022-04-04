@@ -3,7 +3,6 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"gopkg.in/validator.v2"
-	"log"
 	"net/http"
 	"swimming-club-cms-be/dtos"
 	"swimming-club-cms-be/models"
@@ -90,7 +89,6 @@ func (rc *RoleController) RemovePermissionsFromRole(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 		return
 	}
-	log.Println(removePermissions)
 	if errs := validator.Validate(removePermissions); errs != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: errs.Error()})
 		return

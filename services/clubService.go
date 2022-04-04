@@ -14,16 +14,15 @@ type clubService struct{}
 func (cb *clubService) CreateClub(clubDto *models.ClubDto) (*models.Club, error) {
 	club := models.Club{}
 	serviceManager := GetServiceManagerInstance()
-	user, err := serviceManager.GetUserService().GetById(clubDto.CoachId)
-	if err != nil {
-		return nil, err
-	} else if user == nil {
-		return nil, errors.New("coach does not exist")
+	rawUser, _ := serviceManager.GetUserService().GetById(clubDto.CoachId, true)
+	if rawUser == nil {
+		return nil, errors.New("unable to validate coach")
 	}
+	user, _ := rawUser.(*models.UserResult)
 	if user.UserType.Name != utils.COACH {
 		return nil, errors.New("user must be a coach")
 	}
-	err = copier.Copy(&club, clubDto)
+	err := copier.Copy(&club, clubDto)
 	if err != nil {
 		return nil, err
 	}
@@ -47,12 +46,11 @@ func (cb *clubService) AddMembers(newMembers *models.AddMember) (*models.Club, e
 	}
 	userService := GetServiceManagerInstance().GetUserService()
 	for idx := range newMembers.NewMembers {
-		user, err := userService.GetById(newMembers.NewMembers[idx])
-		if err != nil {
-			return nil, err
-		} else if user == nil {
+		rawUser, _ := userService.GetById(newMembers.NewMembers[idx], true)
+		if rawUser == nil {
 			return nil, errors.New("all members must be registered on the system")
 		}
+		user, _ := rawUser.(*models.UserResult)
 		if user.UserType.Name != utils.SWIMMER {
 			return nil, errors.New("all members must be swimmers")
 		}
