@@ -46,10 +46,11 @@ func (es *eventService) AddParticipants(participants *models.AddParticipants) (*
 	existingParticipants := utils.ConvertRefFieldSliceToStringMap(event.Participants)
 	userService := GetServiceManagerInstance().GetUserService()
 	for idx := range participants.Participants {
-		user, _ := userService.GetById(participants.Participants[idx])
-		if user == nil {
+		rawUser, _ := userService.GetById(participants.Participants[idx], true)
+		if rawUser == nil {
 			return nil, errors.New("all participants must be registered on the system")
 		}
+		user, _ := rawUser.(*models.UserResult)
 		if user.UserType.Name != utils.SWIMMER {
 			return nil, errors.New("all participants must be swimmers")
 		}

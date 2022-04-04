@@ -84,6 +84,14 @@ func setCompetitionRoutes(router *gin.Engine) {
 
 	getCompetitionByIdRoute := router.Group("/competition/:id", middlewares.HasAuthority("GET_COMPETITION_BY_ID"))
 	getCompetitionByIdRoute.GET("", competitionController.GetCompetitionById)
+
+	getAllCompetitionsRoute := router.Group("/competitions", middlewares.HasAuthority("GET_ALL_COMPETITIONS"))
+	getAllCompetitionsRoute.GET("", competitionController.GetAllCompetitions)
+
+	deleteCompetitionsRoute := router.Group("/competitions/delete", middlewares.HasAuthority("DELETE_COMPETITION"))
+	deleteCompetitionsRoute.POST("", competitionController.DeleteCompetitions)
+
+	router.GET("/competition/name", competitionController.GetByName)
 }
 
 func setEventRoutes(router *gin.Engine) {
@@ -110,6 +118,9 @@ func setUserRoutes(router *gin.Engine) {
 
 	getByEmailRoute := router.Group("/user/email", middlewares.HasAuthority("GET_USER_BY_EMAIL"))
 	getByEmailRoute.GET("", userController.GetByEmail)
+
+	updateUserRoute := router.Group("/user/update/:id", middlewares.HasAuthority("UPDATE_USER"))
+	updateUserRoute.PUT("", userController.UpdateUser)
 }
 
 func HandleRequests() *gin.Engine {

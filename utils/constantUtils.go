@@ -6,7 +6,7 @@ const (
 	PORT                   = "PORT"
 	MONGO_DB_HOST          = "MONGO_DB_HOST"
 	DB                     = "DB"
-	DOB_DATE_FORMAT        = "2006-01-02"
+	DATE_FORMAT            = "2006-01-02"
 	JWT_SECRET_KEY         = "JWT_SECRET_KEY"
 	JWT_TOKEN_EXPIRY       = "JWT_TOKEN_EXPIRY"
 	AUTHORIZATION          = "Authorization"

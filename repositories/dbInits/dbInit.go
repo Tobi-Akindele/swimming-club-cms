@@ -2,6 +2,7 @@ package dbInits
 
 import (
 	"github.com/goonode/mogo"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 	"swimming-club-cms-be/models"
 	"swimming-club-cms-be/repositories"
@@ -62,6 +63,8 @@ func loadSuperUser() {
 		panic(err)
 	}
 	su := superUser()
+	hash, err := bcrypt.GenerateFromPassword([]byte(su.Password), bcrypt.MinCost)
+	su.Password = string(hash)
 	su.Role = mogo.RefField{ID: superRole.ID}
 	su.UserType = mogo.RefField{ID: superUserType.ID}
 	_, _ = userRepository.SaveUser(su)

@@ -2,7 +2,6 @@ package models
 
 import (
 	"github.com/goonode/mogo"
-	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
@@ -48,6 +47,19 @@ type UserDto struct {
 	RoleId      string `json:"roleId" binding:"required" validate:"nonzero"`
 }
 
+type UserUpdate struct {
+	Image       string `json:"image" binding:"required"`
+	FirstName   string `json:"firstName" binding:"required" validate:"min=2, max=40"`
+	LastName    string `json:"lastName" binding:"required" validate:"min=2, max=40"`
+	MiddleName  string `json:"middleName"`
+	DateOfBirth string `json:"dateOfBirth" binding:"required" validate:"datetime" copier:"-"`
+	UserTypeId  string `json:"userTypeId" binding:"required" validate:"nonzero"`
+	Gender      string `json:"gender" binding:"required" validate:"nonzero"`
+	PhoneNumber string `json:"phoneNumber"`
+	Address     string `json:"address"`
+	RoleId      string `json:"roleId" binding:"required" validate:"nonzero"`
+}
+
 type UserResult struct {
 	mogo.DocumentModel `bson:",inline"`
 	Username           string    `json:"username"`
@@ -78,13 +90,4 @@ type SetPassword struct {
 	ActivationCode  string `json:"activationCode" binding:"required" validate:"nonzero"`
 	Password        string `json:"password" binding:"required" validate:"nonzero, min=8"`
 	ConfirmPassword string `json:"confirmPassword" binding:"required" validate:"nonzero, min=8"`
-}
-
-func (u *User) BeforeSave() error {
-	hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.MinCost)
-	if err != nil {
-		return err
-	}
-	u.Password = string(hash)
-	return err
 }

@@ -57,11 +57,18 @@ func Authentication(permission string) gin.HandlerFunc {
 		if claims, ok := token.Claims.(*dtos.SignedDetails); ok && token.Valid {
 			serviceManager := services.GetServiceManagerInstance()
 			rawRole, _ := serviceManager.GetRoleService().GetById(claims.RoleId, true)
+			if rawRole == nil {
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, dtos.Response{
+					Code:    http.StatusUnauthorized,
+					Message: "Access denied",
+				})
+				return
+			}
 			role, _ := rawRole.(*models.RoleResult)
 			if !utils.MapContainsKey(utils.ConvertPermissionSliceToMap(role.Permissions), permission) {
 				ctx.AbortWithStatusJSON(http.StatusForbidden, dtos.Response{
 					Code:    http.StatusForbidden,
-					Message: "access denied",
+					Message: "Access denied",
 				})
 				return
 			}
