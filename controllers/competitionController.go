@@ -39,7 +39,7 @@ func (cc *CompetitionController) CreateCompetition(ctx *gin.Context) {
 func (cc *CompetitionController) GetCompetitionById(ctx *gin.Context) {
 	competitionId := ctx.Param("id")
 	serviceManager := services.GetServiceManagerInstance()
-	competition, err := serviceManager.GetCompetitionService().GetById(competitionId)
+	competition, err := serviceManager.GetCompetitionService().GetById(competitionId, false)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
@@ -88,5 +88,25 @@ func (cc *CompetitionController) DeleteCompetitions(ctx *gin.Context) {
 			Code:    http.StatusOK,
 			Message: "Deletion successful",
 		})
+	}
+}
+
+func (cc *CompetitionController) RemoveEventFromCompetition(ctx *gin.Context) {
+	var removeEvents models.RemoveEvents
+	if err := ctx.ShouldBindJSON(&removeEvents); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+		return
+	}
+	if errs := validator.Validate(removeEvents); errs != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: errs.Error()})
+		return
+	}
+
+	serviceManager := services.GetServiceManagerInstance()
+	competition, err := serviceManager.GetCompetitionService().RemoveEventFromCompetition(&removeEvents)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+	} else {
+		ctx.JSON(http.StatusCreated, competition)
 	}
 }

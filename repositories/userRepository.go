@@ -87,8 +87,10 @@ func (ur *userRepository) FindById(id string, fetchRelationShips bool) (interfac
 		var userResult models.UserResult
 		var userType []models.UserType
 		var role []models.Role
-		err = userDoc.Populate("UserType").Find(bson.M{}).All(&userType)
-		err = userDoc.Populate("Role").Find(bson.M{}).All(&role)
+		var club []models.Club
+		_ = userDoc.Populate("UserType").Find(bson.M{}).All(&userType)
+		_ = userDoc.Populate("Role").Find(bson.M{}).All(&role)
+		_ = userDoc.Populate("Club").Find(bson.M{}).All(&club)
 		_ = copier.Copy(&userResult, userDoc)
 		if len(userType) > 0 {
 			userResult.UserType = userType[0]
@@ -96,9 +98,44 @@ func (ur *userRepository) FindById(id string, fetchRelationShips bool) (interfac
 		if len(role) > 0 {
 			userResult.Role = role[0]
 		}
+		if len(club) > 0 {
+			userResult.Club = club[0]
+		}
 		return &userResult, nil
 	}
 	return userDoc, nil
+}
+
+func (ur *userRepository) FindByIds(ids []string) ([]models.UserResult, error) {
+	conn := db.GetConnection()
+	defer db.CloseConnection(conn)
+
+	var userResults []models.UserResult
+	for _, userId := range ids {
+		userDoc := mogo.NewDoc(models.User{}).(*models.User)
+		err := userDoc.FindOne(bson.M{"_id": bson.ObjectIdHex(userId)}, userDoc)
+		if err == nil {
+			var userResult models.UserResult
+			var userType []models.UserType
+			var role []models.Role
+			var club []models.Club
+			_ = userDoc.Populate("UserType").Find(bson.M{}).All(&userType)
+			_ = userDoc.Populate("Role").Find(bson.M{}).All(&role)
+			_ = userDoc.Populate("Club").Find(bson.M{}).All(&club)
+			_ = copier.Copy(&userResult, userDoc)
+			if len(userType) > 0 {
+				userResult.UserType = userType[0]
+			}
+			if len(role) > 0 {
+				userResult.Role = role[0]
+			}
+			if len(club) > 0 {
+				userResult.Club = club[0]
+			}
+			userResults = append(userResults, userResult)
+		}
+	}
+	return userResults, nil
 }
 
 func (ur *userRepository) FindAll() ([]*models.UserResult, error) {

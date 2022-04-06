@@ -49,7 +49,7 @@ func (rs *roleService) AssignPermissionsToRole(assignPermissions *models.AssignP
 		if permission == nil {
 			return nil, errors.New("unable to validate all permissions")
 		}
-		if !utils.MapContainsKey(existingPermissions, permission.ID.String()) {
+		if !utils.MapContainsKey(existingPermissions, permission.ID.Hex()) {
 			role.Permissions = append(role.Permissions, &mogo.RefField{ID: permission.ID})
 		}
 	}

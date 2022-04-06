@@ -65,6 +65,11 @@ func (us *userService) GetById(id string, fetchRelationShips bool) (interface{},
 	return userRepository.FindById(id, fetchRelationShips)
 }
 
+func (us *userService) GetByIds(ids []string) ([]models.UserResult, error) {
+	userRepository := repositories.GetRepositoryManagerInstance().GetUserRepository()
+	return userRepository.FindByIds(ids)
+}
+
 func (us *userService) GetAllUsers() ([]*models.UserResult, error) {
 	userRepository := repositories.GetRepositoryManagerInstance().GetUserRepository()
 	return userRepository.FindAll()
@@ -131,4 +136,19 @@ func (us *userService) UpdateUser(userUpdate *models.UserUpdate, userId string) 
 	user.UserType = mogo.RefField{ID: userType.ID}
 	user.Role = mogo.RefField{ID: role.ID}
 	return userRepository.SaveUser(user)
+}
+
+func (us *userService) UpdateUsers(users []*models.User) ([]*models.User, []error) {
+	var errs []error
+	userRepository := repositories.GetRepositoryManagerInstance().GetUserRepository()
+	for _, user := range users {
+		_, err := userRepository.SaveUser(user)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) > 0 {
+		return nil, errs
+	}
+	return users, nil
 }

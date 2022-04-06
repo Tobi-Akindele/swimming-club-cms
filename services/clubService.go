@@ -45,6 +45,7 @@ func (cb *clubService) AddMembers(newMembers *models.AddMember) (*models.Club, e
 		return nil, errors.New("club not found")
 	}
 	userService := GetServiceManagerInstance().GetUserService()
+	var updateUserSlice []*models.User
 	for idx := range newMembers.NewMembers {
 		rawUser, _ := userService.GetById(newMembers.NewMembers[idx], true)
 		if rawUser == nil {
@@ -54,13 +55,21 @@ func (cb *clubService) AddMembers(newMembers *models.AddMember) (*models.Club, e
 		if user.UserType.Name != utils.SWIMMER {
 			return nil, errors.New("all members must be swimmers")
 		}
-		userHasClub, _ := clubRepository.FindByMemberId(user.ID.Hex())
-		if userHasClub != nil {
+		if &user.Club != nil {
 			return nil, errors.New("user already belong to a club")
+		}
+		if userToUpdate, ok := rawUser.(*models.User); ok {
+			userToUpdate.Club = mogo.RefField{ID: club.ID}
+			updateUserSlice = append(updateUserSlice, userToUpdate)
 		}
 		club.Members = append(club.Members, &mogo.RefField{ID: user.ID})
 	}
-	return clubRepository.SaveClub(club)
+	club, err = clubRepository.SaveClub(club)
+	if err != nil {
+		return nil, err
+	}
+	_, _ = userService.UpdateUsers(updateUserSlice)
+	return club, nil
 }
 
 func (cb *clubService) GetAllClubs() ([]*models.Club, error) {

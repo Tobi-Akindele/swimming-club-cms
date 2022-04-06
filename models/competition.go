@@ -31,3 +31,8 @@ type CompetitionResult struct {
 type DeleteCompetition struct {
 	CompetitionIds []string `json:"competitionIds" binding:"required"`
 }
+
+type RemoveEvents struct {
+	CompetitionId string   `json:"competitionId" binding:"required"`
+	EventIds      []string `json:"eventIds" binding:"required"`
+}

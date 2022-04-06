@@ -12,6 +12,7 @@ type repositoryManager struct {
 	roleRepository        *roleRepository
 	userRepository        *userRepository
 	userTypeRepository    *userTypeRepository
+	resultRepository      *resultRepository
 }
 
 var instance *repositoryManager
@@ -74,4 +75,11 @@ func (rm *repositoryManager) GetUserTypeRepository() *userTypeRepository {
 		rm.userTypeRepository = &userTypeRepository{}
 	}
 	return rm.userTypeRepository
+}
+
+func (rm *repositoryManager) GetResultRepository() *resultRepository {
+	if rm.resultRepository == nil {
+		rm.resultRepository = &resultRepository{}
+	}
+	return rm.resultRepository
 }

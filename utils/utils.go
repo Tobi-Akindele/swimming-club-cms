@@ -17,7 +17,7 @@ func GetEnv(param string, defaultValue string) string {
 func ConvertRefFieldSliceToStringMap(refFieldSlice mogo.RefFieldSlice) map[string]string {
 	result := map[string]string{}
 	for refIdx := range refFieldSlice {
-		result[refFieldSlice[refIdx].ID.String()] = refFieldSlice[refIdx].ID.String()
+		result[refFieldSlice[refIdx].ID.Hex()] = refFieldSlice[refIdx].ID.Hex()
 	}
 	return result
 }
@@ -64,4 +64,12 @@ func ConvertPermissionSliceToMap(permissionsSrc []models.Permission) map[string]
 		permissions[permissionsSrc[i].Value] = permissionsSrc[i].Name
 	}
 	return permissions
+}
+
+func ExtractUserIdsFromUserStructs(users []models.UserResult) []string {
+	var result []string
+	for _, user := range users {
+		result = append(result, user.ID.Hex())
+	}
+	return result
 }

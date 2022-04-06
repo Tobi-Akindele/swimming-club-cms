@@ -91,6 +91,9 @@ func setCompetitionRoutes(router *gin.Engine) {
 	deleteCompetitionsRoute := router.Group("/competitions/delete", middlewares.HasAuthority("DELETE_COMPETITION"))
 	deleteCompetitionsRoute.POST("", competitionController.DeleteCompetitions)
 
+	deleteCompetitionEventRoute := router.Group("/remove/events", middlewares.HasAuthority("DELETE_EVENT"))
+	deleteCompetitionEventRoute.POST("", competitionController.RemoveEventFromCompetition)
+
 	router.GET("/competition/name", competitionController.GetByName)
 }
 
@@ -103,8 +106,16 @@ func setEventRoutes(router *gin.Engine) {
 	getEventByIdRoute := router.Group("/event/:id", middlewares.HasAuthority("GET_EVENT_BY_ID"))
 	getEventByIdRoute.GET("", eventController.GetEventById)
 
-	addParticipantsToClubRoute := router.Group("/event/add/participants", middlewares.HasAuthority("ADD_PARTICIPANTS_TO_EVENT"))
-	addParticipantsToClubRoute.POST("", eventController.AddParticipants)
+	removeParticipantsRoute := router.Group("/remove/participants", middlewares.HasAuthority("REMOVE_PARTICIPANTS"))
+	removeParticipantsRoute.POST("", eventController.RemoveParticipantsFromEvent)
+
+	recordEventResultRoute := router.Group("/event/results", middlewares.HasAuthority("RECORD_RESULTS"))
+	recordEventResultRoute.POST("", eventController.RecordResults)
+
+	//eventRegistrationRoute := router.Group("/event/register", middlewares.HasAuthority("ADD_PARTICIPANTS_TO_EVENT"))
+	router.POST("/event/register", eventController.AddParticipants)
+
+	router.GET("/event/name", eventController.GetEventByName)
 }
 
 func setUserRoutes(router *gin.Engine) {
