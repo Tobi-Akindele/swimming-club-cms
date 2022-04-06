@@ -28,6 +28,7 @@ type User struct {
 	Role               mogo.RefField `json:"role" ref:"Role"`
 	Active             bool          `json:"active"`
 	ActivationCode     string        `json:"activationCode"`
+	Club               mogo.RefField `json:"club" ref:"Club"`
 }
 
 //goland:noinspection ALL
@@ -79,6 +80,9 @@ type UserResult struct {
 	Role               Role      `json:"role"`
 	Active             bool      `json:"active"`
 	ActivationCode     string    `json:"activationCode"`
+	Club               Club      `json:"club"`
+	Time               string    `json:"time"`
+	FinalPoint         int       `json:"finalPoint"`
 }
 
 type Login struct {

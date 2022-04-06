@@ -75,7 +75,7 @@ func newPermissions(oldPermissions mogo.RefFieldSlice, allPermissions []*models.
 	var newPermissionsSlice []*models.Permission
 	oldPermissionsStringSlice := utils.ConvertRefFieldSliceToStringMap(oldPermissions)
 	for p := range allPermissions {
-		_, ok := oldPermissionsStringSlice[allPermissions[p].ID.String()]
+		_, ok := oldPermissionsStringSlice[allPermissions[p].ID.Hex()]
 		if !ok {
 			newPermissionsSlice = append(newPermissionsSlice, allPermissions[p])
 		}

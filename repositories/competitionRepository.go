@@ -10,7 +10,7 @@ import (
 
 type competitionRepository struct{}
 
-func (cr *competitionRepository) FindById(id string) (*models.Competition, error) {
+func (cr *competitionRepository) FindById(id string, fetchRelationship bool) (interface{}, error) {
 	conn := db.GetConnection()
 	defer db.CloseConnection(conn)
 
@@ -18,6 +18,15 @@ func (cr *competitionRepository) FindById(id string) (*models.Competition, error
 	err := competitionDoc.FindOne(bson.M{"_id": bson.ObjectIdHex(id)}, competitionDoc)
 	if err != nil {
 		return nil, err
+	}
+	if fetchRelationship {
+		var competitionResult models.CompetitionResult
+		var events []models.Event
+		_ = competitionDoc.Populate("Events").Find(bson.M{}).All(&events)
+
+		_ = copier.Copy(&competitionResult, competitionDoc)
+		competitionResult.Events = events
+		return &competitionResult, nil
 	}
 	return competitionDoc, nil
 }
@@ -51,9 +60,7 @@ func (cr *competitionRepository) FindAll() ([]*models.CompetitionResult, error) 
 		u := mogo.NewDoc(competition).(*models.Competition)
 		_ = u.Populate("Events").Find(bson.M{}).All(&events)
 		_ = copier.Copy(&competitionResult, competition)
-		if len(events) > 0 {
-			competitionResult.Events = events
-		}
+		competitionResult.Events = events
 		result[i] = &competitionResult
 	}
 	return result, nil

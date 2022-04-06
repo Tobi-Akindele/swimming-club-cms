@@ -2,8 +2,10 @@ package services
 
 import (
 	"errors"
+	"github.com/globalsign/mgo/bson"
 	"github.com/goonode/mogo"
 	"github.com/jinzhu/copier"
+	"strings"
 	"swimming-club-cms-be/models"
 	"swimming-club-cms-be/repositories"
 	"swimming-club-cms-be/utils"
@@ -14,10 +16,11 @@ type eventService struct{}
 func (es *eventService) CreateEvent(eventDto *models.CreateEvent) (*models.Event, error) {
 	event := models.Event{}
 	competitionService := GetServiceManagerInstance().GetCompetitionService()
-	competition, _ := competitionService.GetById(eventDto.CompetitionId)
-	if competition == nil {
+	rawCompetition, _ := competitionService.GetById(eventDto.CompetitionId, false)
+	if rawCompetition == nil {
 		return nil, errors.New("competition not found")
 	}
+	competition, _ := rawCompetition.(*models.Competition)
 	err := copier.Copy(&event, eventDto)
 	if err != nil {
 		return nil, err
@@ -32,30 +35,91 @@ func (es *eventService) CreateEvent(eventDto *models.CreateEvent) (*models.Event
 	return savedEvent, nil
 }
 
-func (es *eventService) GetById(id string) (*models.Event, error) {
+func (es *eventService) GetById(id string, fetchRelationships bool) (interface{}, error) {
 	eventRepository := repositories.GetRepositoryManagerInstance().GetEventRepository()
-	return eventRepository.FindById(id)
+	return eventRepository.FindById(id, fetchRelationships)
 }
 
-func (es *eventService) AddParticipants(participants *models.AddParticipants) (*models.Event, error) {
+func (es *eventService) AddParticipant(participant *models.AddParticipant) (*models.Event, error) {
 	eventRepository := repositories.GetRepositoryManagerInstance().GetEventRepository()
-	event, _ := eventRepository.FindById(participants.EventId)
-	if event == nil {
+	rawEvent, _ := eventRepository.FindById(participant.EventId, false)
+	if rawEvent == nil {
 		return nil, errors.New("event not found")
 	}
+	event, _ := rawEvent.(*models.Event)
 	existingParticipants := utils.ConvertRefFieldSliceToStringMap(event.Participants)
 	userService := GetServiceManagerInstance().GetUserService()
-	for idx := range participants.Participants {
-		rawUser, _ := userService.GetById(participants.Participants[idx], true)
-		if rawUser == nil {
-			return nil, errors.New("all participants must be registered on the system")
+
+	user, _ := userService.GetByUsername(participant.Participant)
+	if user == nil {
+		return nil, errors.New("all participants must be registered")
+	}
+	if !user.Active {
+		return nil, errors.New("all participants must be active")
+	}
+	if user.UserType.Name != utils.SWIMMER {
+		return nil, errors.New("all participants must be swimmers")
+	}
+	if !utils.MapContainsKey(existingParticipants, user.ID.Hex()) {
+		event.Participants = append(event.Participants, &mogo.RefField{ID: user.ID})
+	}
+
+	return eventRepository.SaveEvent(event)
+}
+
+func (es *eventService) GetByName(eventByName *models.EventByName) (*models.Event, error) {
+	competitionService := GetServiceManagerInstance().GetCompetitionService()
+	rawCompetition, _ := competitionService.GetById(eventByName.CompetitionId, true)
+	if rawCompetition == nil {
+		return nil, errors.New("competition not found")
+	}
+	competition, _ := rawCompetition.(*models.CompetitionResult)
+	if len(competition.Events) > 0 {
+		for _, event := range competition.Events {
+			if strings.TrimSpace(eventByName.Name) == event.Name {
+				return &event, nil
+			}
 		}
-		user, _ := rawUser.(*models.UserResult)
-		if user.UserType.Name != utils.SWIMMER {
-			return nil, errors.New("all participants must be swimmers")
+	}
+
+	return nil, errors.New("event not found")
+}
+
+func (es *eventService) RemoveParticipantsFromEvent(removeParticipants *models.RemoveParticipants) (*models.Event, error) {
+	eventRepository := repositories.GetRepositoryManagerInstance().GetEventRepository()
+	rawEvent, _ := eventRepository.FindById(removeParticipants.EventId, false)
+	if rawEvent == nil {
+		return nil, errors.New("event not found")
+	}
+	event, _ := rawEvent.(*models.Event)
+	event.Participants = utils.RemoveRefFromRefSlice(event.Participants, removeParticipants.ParticipantIds)
+	return eventRepository.SaveEvent(event)
+}
+
+func (es *eventService) RecordResults(recordResult *models.RecordResult) (*models.Event, error) {
+	eventRepository := repositories.GetRepositoryManagerInstance().GetEventRepository()
+	rawEvent, _ := eventRepository.FindById(recordResult.EventId, false)
+	if rawEvent == nil {
+		return nil, errors.New("event not found")
+	}
+	event, _ := rawEvent.(*models.Event)
+	participants := utils.ConvertRefFieldSliceToStringMap(event.Participants)
+	var results []*models.Result
+	for _, resultData := range recordResult.Results {
+		if !utils.MapContainsKey(participants, resultData.ParticipantId) {
+			return nil, errors.New("only registered participants can have result")
 		}
-		if !utils.MapContainsKey(existingParticipants, user.ID.String()) {
-			event.Participants = append(event.Participants, &mogo.RefField{ID: user.ID})
+		var result models.Result
+		result.Time = resultData.Time
+		result.FinalPoint = resultData.FinalPoint
+		result.Participant = mogo.RefField{ID: bson.ObjectIdHex(resultData.ParticipantId)}
+		results = append(results, &result)
+	}
+	resultRepository := repositories.GetRepositoryManagerInstance().GetResultRepository()
+	for _, result := range results {
+		result, err := resultRepository.SaveResult(result)
+		if err == nil {
+			event.Results = append(event.Results, &mogo.RefField{ID: result.ID})
 		}
 	}
 	return eventRepository.SaveEvent(event)

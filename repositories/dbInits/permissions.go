@@ -104,6 +104,18 @@ func permissions() []*models.Permission {
 			Name:  "DELETE COMPETITION",
 			Value: "DELETE_COMPETITION",
 		},
+		{
+			Name:  "DELETE EVENT",
+			Value: "DELETE_EVENT",
+		},
+		{
+			Name:  "REMOVE PARTICIPANTS",
+			Value: "REMOVE_PARTICIPANTS",
+		},
+		{
+			Name:  "RECORD RESULTS",
+			Value: "RECORD_RESULTS",
+		},
 	}
 	return pList
 }
