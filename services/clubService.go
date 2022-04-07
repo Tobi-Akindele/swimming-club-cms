@@ -14,7 +14,8 @@ type clubService struct{}
 func (cb *clubService) CreateClub(clubDto *models.ClubDto) (*models.Club, error) {
 	club := models.Club{}
 	serviceManager := GetServiceManagerInstance()
-	rawUser, _ := serviceManager.GetUserService().GetById(clubDto.CoachId, true)
+	userService := serviceManager.GetUserService()
+	rawUser, _ := userService.GetById(clubDto.CoachId, true)
 	if rawUser == nil {
 		return nil, errors.New("unable to validate coach")
 	}
@@ -28,7 +29,18 @@ func (cb *clubService) CreateClub(clubDto *models.ClubDto) (*models.Club, error)
 	}
 	club.Coach = mogo.RefField{ID: user.ID}
 	clubRepository := repositories.GetRepositoryManagerInstance().GetClubRepository()
-	return clubRepository.SaveClub(&club)
+	createdClub, err := clubRepository.SaveClub(&club)
+	if err != nil {
+		return nil, err
+	}
+	var userToUpdateSlice []*models.User
+	rawUser, _ = userService.GetById(clubDto.CoachId, false)
+	userToUpdate, _ := rawUser.(*models.User)
+	userToUpdate.Club = mogo.RefField{ID: createdClub.ID}
+	userToUpdateSlice = append(userToUpdateSlice, userToUpdate)
+	_, _ = GetServiceManagerInstance().GetUserService().UpdateUsers(userToUpdateSlice)
+
+	return createdClub, nil
 }
 
 func (cb *clubService) GetById(id string) (*models.Club, error) {
@@ -72,7 +84,7 @@ func (cb *clubService) AddMembers(newMembers *models.AddMember) (*models.Club, e
 	return club, nil
 }
 
-func (cb *clubService) GetAllClubs() ([]*models.Club, error) {
+func (cb *clubService) GetAllClubs() ([]*models.ClubResult, error) {
 	clubRepository := repositories.GetRepositoryManagerInstance().GetClubRepository()
 	return clubRepository.FindAll()
 }

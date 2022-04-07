@@ -3,6 +3,7 @@ package repositories
 import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/goonode/mogo"
+	"github.com/jinzhu/copier"
 	"swimming-club-cms-be/configs/db"
 	"swimming-club-cms-be/models"
 )
@@ -45,15 +46,30 @@ func (cr *clubRepository) FindByMemberId(memberId string) (*models.Club, error) 
 	return clubDoc, nil
 }
 
-func (cr *clubRepository) FindAll() ([]*models.Club, error) {
+func (cr *clubRepository) FindAll() ([]*models.ClubResult, error) {
 	conn := db.GetConnection()
 	defer db.CloseConnection(conn)
 
 	clubDoc := mogo.NewDoc(models.Club{}).(*models.Club)
-	var results []*models.Club
-	err := clubDoc.Find(nil).Q().Sort("-_created").All(&results)
+	var clubs []*models.Club
+	err := clubDoc.Find(nil).Q().Sort("-_created").All(&clubs)
 	if err != nil {
 		return nil, err
 	}
-	return results, nil
+	result := make([]*models.ClubResult, len(clubs))
+	for i, club := range clubs {
+		var clubResult models.ClubResult
+		var coach []models.User
+		var members []models.User
+		u := mogo.NewDoc(club).(*models.Club)
+		_ = u.Populate("Coach").Find(bson.M{}).All(&coach)
+		_ = u.Populate("Members").Find(bson.M{}).All(&members)
+		_ = copier.Copy(&clubResult, club)
+		if len(coach) > 0 {
+			clubResult.Coach = coach[0]
+		}
+		clubResult.Members = members
+		result[i] = &clubResult
+	}
+	return result, nil
 }

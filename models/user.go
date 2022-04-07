@@ -83,6 +83,7 @@ type UserResult struct {
 	Club               Club      `json:"club"`
 	Time               string    `json:"time"`
 	FinalPoint         int       `json:"finalPoint"`
+	ResultId           string    `json:"resultId"`
 }
 
 type Login struct {

@@ -153,15 +153,20 @@ func (ur *userRepository) FindAll() ([]*models.UserResult, error) {
 		var userResult models.UserResult
 		var userType []models.UserType
 		var role []models.Role
+		var club []models.Club
 		u := mogo.NewDoc(users[idx]).(*models.User)
 		_ = u.Populate("UserType").Find(bson.M{}).All(&userType)
 		_ = u.Populate("Role").Find(bson.M{}).All(&role)
+		_ = u.Populate("Club").Find(bson.M{}).All(&club)
 		_ = copier.Copy(&userResult, users[idx])
 		if len(userType) > 0 {
 			userResult.UserType = userType[0]
 		}
 		if len(role) > 0 {
 			userResult.Role = role[0]
+		}
+		if len(club) > 0 {
+			userResult.Club = club[0]
 		}
 		result[idx] = &userResult
 	}
