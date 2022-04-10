@@ -40,3 +40,14 @@ func (utc *UserTypeController) GetAllUserTypes(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, userTypes)
 	}
 }
+
+func (utc *UserTypeController) GetUserTypeById(ctx *gin.Context) {
+	userTypeId := ctx.Param("id")
+	serviceManager := services.GetServiceManagerInstance()
+	userType, err := serviceManager.GetUserTypeService().GetById(userTypeId)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+	} else {
+		ctx.JSON(http.StatusOK, userType)
+	}
+}

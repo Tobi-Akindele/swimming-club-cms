@@ -35,21 +35,21 @@ func (cc *ClubController) CreateClub(ctx *gin.Context) {
 }
 
 func (cc *ClubController) AddMembers(ctx *gin.Context) {
-	var newMembers models.AddMember
-	if err := ctx.ShouldBindJSON(&newMembers); err != nil {
+	var newMember models.AddMember
+	if err := ctx.ShouldBindJSON(&newMember); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{
 			Code: http.StatusBadRequest, Message: err.Error(),
 		})
 		return
 	}
-	if errs := validator.Validate(newMembers); errs != nil {
+	if errs := validator.Validate(newMember); errs != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{
 			Code: http.StatusBadRequest, Message: errs.Error(),
 		})
 		return
 	}
 	serviceManager := services.GetServiceManagerInstance()
-	club, err := serviceManager.GetClubService().AddMembers(&newMembers)
+	club, err := serviceManager.GetClubService().AddMember(&newMember)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
@@ -60,7 +60,7 @@ func (cc *ClubController) AddMembers(ctx *gin.Context) {
 func (cc *ClubController) GetClubById(ctx *gin.Context) {
 	clubId := ctx.Param("id")
 	serviceManager := services.GetServiceManagerInstance()
-	club, err := serviceManager.GetClubService().GetById(clubId)
+	club, err := serviceManager.GetClubService().GetById(clubId, true)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
@@ -75,5 +75,16 @@ func (cc *ClubController) GetAllClubs(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
 		ctx.JSON(http.StatusOK, clubs)
+	}
+}
+
+func (cc *ClubController) GetClubByName(ctx *gin.Context) {
+	name := ctx.GetHeader("name")
+	serviceManager := services.GetServiceManagerInstance()
+	club, err := serviceManager.GetClubService().GetByName(name)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+	} else {
+		ctx.JSON(http.StatusOK, club)
 	}
 }

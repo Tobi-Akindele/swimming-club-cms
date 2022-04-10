@@ -152,3 +152,15 @@ func (us *userService) UpdateUsers(users []*models.User) ([]*models.User, []erro
 	}
 	return users, nil
 }
+
+func (us *userService) SearchUsersByUserType(username string, userTypeName string) ([]*models.User, error) {
+	userTypeService := GetServiceManagerInstance().GetUserTypeService()
+	var userType *models.UserType
+	if userTypeName == utils.COACH {
+		userType, _ = userTypeService.GetByName(utils.COACH)
+	} else if userTypeName == utils.SWIMMER {
+		userType, _ = userTypeService.GetByName(utils.SWIMMER)
+	}
+	userRepository := repositories.GetRepositoryManagerInstance().GetUserRepository()
+	return userRepository.FindAllUsersByUsernameAndUserType(username, userType.ID.Hex())
+}

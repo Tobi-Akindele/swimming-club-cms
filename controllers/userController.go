@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gopkg.in/validator.v2"
 	"net/http"
+	"strings"
 	"swimming-club-cms-be/dtos"
 	"swimming-club-cms-be/models"
 	"swimming-club-cms-be/services"
@@ -62,5 +63,21 @@ func (uc *UserController) UpdateUser(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
 		ctx.JSON(http.StatusCreated, updatedUser)
+	}
+}
+
+func (uc *UserController) SearchUsersByUserType(ctx *gin.Context) {
+	username := ctx.GetHeader("username")
+	userType := ctx.GetHeader("userType")
+	if len(userType) == 0 {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: "User type is required"})
+		return
+	}
+	serviceManager := services.GetServiceManagerInstance()
+	users, err := serviceManager.GetUserService().SearchUsersByUserType(username, strings.ToUpper(userType))
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+	} else {
+		ctx.JSON(http.StatusOK, users)
 	}
 }

@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"fmt"
 	"github.com/globalsign/mgo/bson"
 	"github.com/goonode/mogo"
 	"github.com/jinzhu/copier"
@@ -184,4 +185,20 @@ func (ur *userRepository) FindByActivationCode(activationCode string) (*models.U
 	}
 
 	return userDoc, nil
+}
+
+func (ur *userRepository) FindAllUsersByUsernameAndUserType(username string, usertypeId string) ([]*models.User, error) {
+	conn := db.GetConnection()
+	defer db.CloseConnection(conn)
+
+	userDoc := mogo.NewDoc(models.User{}).(*models.User)
+	var users []*models.User
+	err := userDoc.Find(bson.M{"username": bson.RegEx{
+		Pattern: fmt.Sprintf(".*%s.*", username),
+		Options: "i",
+	}, "usertype._id": bson.ObjectIdHex(usertypeId)}).Q().Limit(10).All(&users)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }

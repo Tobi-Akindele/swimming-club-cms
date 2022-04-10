@@ -48,12 +48,13 @@ func (es *eventService) AddParticipant(participant *models.AddParticipant) (*mod
 	}
 	event, _ := rawEvent.(*models.Event)
 	existingParticipants := utils.ConvertRefFieldSliceToStringMap(event.Participants)
-	userService := GetServiceManagerInstance().GetUserService()
 
-	user, _ := userService.GetByUsername(participant.Participant)
-	if user == nil {
+	userService := GetServiceManagerInstance().GetUserService()
+	rawUser, _ := userService.GetById(participant.ParticipantId, true)
+	if rawUser == nil {
 		return nil, errors.New("all participants must be registered")
 	}
+	user, _ := rawUser.(*models.UserResult)
 	if !user.Active {
 		return nil, errors.New("all participants must be active")
 	}

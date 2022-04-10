@@ -26,8 +26,8 @@ type CreateEvent struct {
 }
 
 type AddParticipant struct {
-	EventId     string `json:"eventId" binding:"required" validate:"nonzero"`
-	Participant string `json:"participant" binding:"required" validate:"nonzero"`
+	EventId       string `json:"eventId" binding:"required" validate:"nonzero"`
+	ParticipantId string `json:"participantId" binding:"required" validate:"nonzero"`
 }
 
 type EventByName struct {
