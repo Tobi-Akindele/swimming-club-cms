@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"fmt"
 	"github.com/globalsign/mgo/bson"
 	"github.com/goonode/mogo"
 	"github.com/jinzhu/copier"
@@ -153,15 +154,20 @@ func (ur *userRepository) FindAll() ([]*models.UserResult, error) {
 		var userResult models.UserResult
 		var userType []models.UserType
 		var role []models.Role
+		var club []models.Club
 		u := mogo.NewDoc(users[idx]).(*models.User)
 		_ = u.Populate("UserType").Find(bson.M{}).All(&userType)
 		_ = u.Populate("Role").Find(bson.M{}).All(&role)
+		_ = u.Populate("Club").Find(bson.M{}).All(&club)
 		_ = copier.Copy(&userResult, users[idx])
 		if len(userType) > 0 {
 			userResult.UserType = userType[0]
 		}
 		if len(role) > 0 {
 			userResult.Role = role[0]
+		}
+		if len(club) > 0 {
+			userResult.Club = club[0]
 		}
 		result[idx] = &userResult
 	}
@@ -179,4 +185,20 @@ func (ur *userRepository) FindByActivationCode(activationCode string) (*models.U
 	}
 
 	return userDoc, nil
+}
+
+func (ur *userRepository) FindAllUsersByUsernameAndUserType(username string, usertypeId string) ([]*models.User, error) {
+	conn := db.GetConnection()
+	defer db.CloseConnection(conn)
+
+	userDoc := mogo.NewDoc(models.User{}).(*models.User)
+	var users []*models.User
+	err := userDoc.Find(bson.M{"username": bson.RegEx{
+		Pattern: fmt.Sprintf(".*%s.*", username),
+		Options: "i",
+	}, "usertype._id": bson.ObjectIdHex(usertypeId)}).Q().Limit(10).All(&users)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }

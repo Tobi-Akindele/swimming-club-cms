@@ -58,6 +58,8 @@ func setUserTypeRoutes(router *gin.Engine) {
 
 	getAllUserTypeRoute := router.Group("/user-types", middlewares.HasAuthority("GET_ALL_USER_TYPES"))
 	getAllUserTypeRoute.GET("", userTypeController.GetAllUserTypes)
+
+	router.GET("/user-type/:id", userTypeController.GetUserTypeById)
 }
 
 func setClubRoutes(router *gin.Engine) {
@@ -74,6 +76,8 @@ func setClubRoutes(router *gin.Engine) {
 
 	getAllClubsRoute := router.Group("/clubs", middlewares.HasAuthority("GET_ALL_CLUBS"))
 	getAllClubsRoute.GET("", clubController.GetAllClubs)
+
+	router.GET("/club/name", clubController.GetClubByName)
 }
 
 func setCompetitionRoutes(router *gin.Engine) {
@@ -132,6 +136,8 @@ func setUserRoutes(router *gin.Engine) {
 
 	updateUserRoute := router.Group("/user/update/:id", middlewares.HasAuthority("UPDATE_USER"))
 	updateUserRoute.PUT("", userController.UpdateUser)
+
+	router.GET("/users/search/type", userController.SearchUsersByUserType)
 }
 
 func HandleRequests() *gin.Engine {

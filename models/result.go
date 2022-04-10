@@ -18,6 +18,7 @@ type RecordResult struct {
 }
 type ResultData struct {
 	ParticipantId string `json:"participantId" binding:"required"`
+	ResultId      string `json:"resultId"`
 	Time          string `json:"time" binding:"required"`
 	FinalPoint    int    `json:"finalPoint" binding:"required"`
 }

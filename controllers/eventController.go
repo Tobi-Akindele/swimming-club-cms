@@ -51,6 +51,7 @@ func (ec *EventController) GetEventById(ctx *gin.Context) {
 					if participants[i].ID.Hex() == result.Participant.ID.Hex() {
 						participants[i].Time = result.Time
 						participants[i].FinalPoint = result.FinalPoint
+						participants[i].ResultId = result.ID.Hex()
 						break
 					}
 				}

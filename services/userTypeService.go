@@ -30,3 +30,8 @@ func (uts *userTypeService) GetAllUserTypes() ([]*models.UserType, error) {
 	userTypeRepository := repositories.GetRepositoryManagerInstance().GetUserTypeRepository()
 	return userTypeRepository.FindAll()
 }
+
+func (uts *userTypeService) GetByName(name string) (*models.UserType, error) {
+	userTypeRepository := repositories.GetRepositoryManagerInstance().GetUserTypeRepository()
+	return userTypeRepository.FindByName(strings.ToUpper(name))
+}

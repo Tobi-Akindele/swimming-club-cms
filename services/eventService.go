@@ -48,12 +48,13 @@ func (es *eventService) AddParticipant(participant *models.AddParticipant) (*mod
 	}
 	event, _ := rawEvent.(*models.Event)
 	existingParticipants := utils.ConvertRefFieldSliceToStringMap(event.Participants)
-	userService := GetServiceManagerInstance().GetUserService()
 
-	user, _ := userService.GetByUsername(participant.Participant)
-	if user == nil {
+	userService := GetServiceManagerInstance().GetUserService()
+	rawUser, _ := userService.GetById(participant.ParticipantId, true)
+	if rawUser == nil {
 		return nil, errors.New("all participants must be registered")
 	}
+	user, _ := rawUser.(*models.UserResult)
 	if !user.Active {
 		return nil, errors.New("all participants must be active")
 	}
@@ -98,6 +99,7 @@ func (es *eventService) RemoveParticipantsFromEvent(removeParticipants *models.R
 
 func (es *eventService) RecordResults(recordResult *models.RecordResult) (*models.Event, error) {
 	eventRepository := repositories.GetRepositoryManagerInstance().GetEventRepository()
+	resultRepository := repositories.GetRepositoryManagerInstance().GetResultRepository()
 	rawEvent, _ := eventRepository.FindById(recordResult.EventId, false)
 	if rawEvent == nil {
 		return nil, errors.New("event not found")
@@ -110,16 +112,21 @@ func (es *eventService) RecordResults(recordResult *models.RecordResult) (*model
 			return nil, errors.New("only registered participants can have result")
 		}
 		var result models.Result
+		existingResult, _ := resultRepository.FindById(resultData.ResultId)
+		if existingResult != nil {
+			result = *existingResult
+		}
 		result.Time = resultData.Time
 		result.FinalPoint = resultData.FinalPoint
 		result.Participant = mogo.RefField{ID: bson.ObjectIdHex(resultData.ParticipantId)}
 		results = append(results, &result)
 	}
-	resultRepository := repositories.GetRepositoryManagerInstance().GetResultRepository()
 	for _, result := range results {
 		result, err := resultRepository.SaveResult(result)
 		if err == nil {
-			event.Results = append(event.Results, &mogo.RefField{ID: result.ID})
+			if !utils.MapContainsKey(utils.ConvertRefFieldSliceToStringMap(event.Results), result.ID.Hex()) {
+				event.Results = append(event.Results, &mogo.RefField{ID: result.ID})
+			}
 		}
 	}
 	return eventRepository.SaveEvent(event)

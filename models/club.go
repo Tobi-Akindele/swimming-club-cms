@@ -19,6 +19,13 @@ type ClubDto struct {
 }
 
 type AddMember struct {
-	ClubId     string   `json:"clubId" binding:"required" validate:"nonzero"`
-	NewMembers []string `json:"newMembers" binding:"required" validate:"min=1"`
+	ClubId   string `json:"clubId" binding:"required" validate:"nonzero"`
+	MemberId string `json:"memberId" binding:"required" validate:"nonzero"`
+}
+
+type ClubResult struct {
+	mogo.DocumentModel `bson:",inline"`
+	Name               string `json:"name"`
+	Coach              User   `json:"coach"`
+	Members            []User `json:"members"`
 }
