@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/goonode/mogo"
 	"os"
 	"swimming-club-cms-be/models"
@@ -72,4 +73,13 @@ func ExtractUserIdsFromUserStructs(users []models.UserResult) []string {
 		result = append(result, user.ID.Hex())
 	}
 	return result
+}
+
+func IsAdmin(ctx *gin.Context) (*models.User, bool) {
+	if rawUser, ok := ctx.Get(USER); ok {
+		user, _ := rawUser.(*models.User)
+		return user, user.Admin
+	}
+	//Ideally the line is unreachable
+	return nil, false
 }

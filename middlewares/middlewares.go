@@ -56,6 +56,14 @@ func Authentication(permission string) gin.HandlerFunc {
 		}
 		if claims, ok := token.Claims.(*dtos.SignedDetails); ok && token.Valid {
 			serviceManager := services.GetServiceManagerInstance()
+			rawUser, _ := serviceManager.GetUserService().GetById(claims.UserId, false)
+			if rawUser == nil {
+				ctx.AbortWithStatusJSON(http.StatusNotFound, dtos.Response{
+					Code:    http.StatusNotFound,
+					Message: "User not found",
+				})
+				return
+			}
 			rawRole, _ := serviceManager.GetRoleService().GetById(claims.RoleId, true)
 			if rawRole == nil {
 				ctx.AbortWithStatusJSON(http.StatusUnauthorized, dtos.Response{
@@ -72,7 +80,15 @@ func Authentication(permission string) gin.HandlerFunc {
 				})
 				return
 			}
-			ctx.Set(utils.USER, claims.UserId)
+			if user, parsed := rawUser.(*models.User); !parsed {
+				ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{
+					Code:    http.StatusBadRequest,
+					Message: "An occurred parsing user data",
+				})
+				return
+			} else {
+				ctx.Set(utils.USER, user)
+			}
 			ctx.Next()
 		} else {
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{

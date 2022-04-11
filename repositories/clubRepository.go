@@ -99,3 +99,15 @@ func (cr *clubRepository) FindByName(name string) (*models.Club, error) {
 	}
 	return clubDoc, nil
 }
+
+func (cr *clubRepository) FindByCoachId(coachId string) (*models.Club, error) {
+	conn := db.GetConnection()
+	defer db.CloseConnection(conn)
+
+	clubDoc := mogo.NewDoc(models.Club{}).(*models.Club)
+	err := clubDoc.FindOne(bson.M{"coach._id": bson.ObjectIdHex(coachId)}, clubDoc)
+	if err != nil {
+		return nil, err
+	}
+	return clubDoc, nil
+}

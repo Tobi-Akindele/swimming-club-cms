@@ -43,17 +43,26 @@ func (ec *EventController) GetEventById(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
 		userService := services.GetServiceManagerInstance().GetUserService()
+		cluService := services.GetServiceManagerInstance().GetClubService()
 		event, _ := rawEvent.(*models.EventResult)
 		participants, _ := userService.GetByIds(utils.ExtractUserIdsFromUserStructs(event.Participants))
-		if event.Results != nil && participants != nil {
-			for _, result := range event.Results {
-				for i := range participants {
-					if participants[i].ID.Hex() == result.Participant.ID.Hex() {
-						participants[i].Time = result.Time
-						participants[i].FinalPoint = result.FinalPoint
-						participants[i].ResultId = result.ID.Hex()
-						break
+		if participants != nil {
+			if event.Results != nil {
+				for _, result := range event.Results {
+					for i := range participants {
+						if participants[i].ID.Hex() == result.Participant.ID.Hex() {
+							participants[i].Time = result.Time
+							participants[i].FinalPoint = result.FinalPoint
+							participants[i].ResultId = result.ID.Hex()
+							break
+						}
 					}
+				}
+			}
+			for i := range participants {
+				club, _ := cluService.GetByMemberId(participants[i].ID.Hex())
+				if club != nil {
+					participants[i].Club = *club
 				}
 			}
 		}

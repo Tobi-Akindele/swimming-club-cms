@@ -116,6 +116,22 @@ func permissions() []*models.Permission {
 			Name:  "RECORD RESULTS",
 			Value: "RECORD_RESULTS",
 		},
+		{
+			Name:  "REMOVE CLUB MEMBERS",
+			Value: "REMOVE_CLUB_MEMBERS",
+		},
+		{
+			Name:  "UPDATE CLUB",
+			Value: "UPDATE_CLUB",
+		},
+		{
+			Name:  "GET PROFILE DETAILS",
+			Value: "GET_PROFILE_DETAILS",
+		},
+		{
+			Name:  "UPDATE PROFILE DETAILS",
+			Value: "UPDATE_PROFILE_DETAILS",
+		},
 	}
 	return pList
 }
