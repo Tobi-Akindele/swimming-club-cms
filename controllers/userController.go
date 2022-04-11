@@ -81,3 +81,25 @@ func (uc *UserController) SearchUsersByUserType(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, users)
 	}
 }
+
+func (uc *UserController) GetUserById(ctx *gin.Context) {
+	userId := ctx.Param("id")
+	serviceManager := services.GetServiceManagerInstance()
+	rawUser, err := serviceManager.GetUserService().GetById(userId, true)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+	} else {
+		user, _ := rawUser.(*models.UserResult)
+		clubService := serviceManager.GetClubService()
+		club, _ := clubService.GetByCoachId(user.ID.Hex())
+		if club == nil {
+			club, _ = clubService.GetByMemberId(user.ID.Hex())
+			if club != nil {
+				user.Club = *club
+			}
+		} else {
+			user.Club = *club
+		}
+		ctx.JSON(http.StatusOK, rawUser)
+	}
+}

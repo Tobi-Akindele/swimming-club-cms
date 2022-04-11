@@ -28,7 +28,6 @@ type User struct {
 	Role               mogo.RefField `json:"role" ref:"Role"`
 	Active             bool          `json:"active"`
 	ActivationCode     string        `json:"activationCode"`
-	Club               mogo.RefField `json:"club" ref:"Club"`
 }
 
 //goland:noinspection ALL
@@ -49,16 +48,16 @@ type UserDto struct {
 }
 
 type UserUpdate struct {
-	Image       string `json:"image" binding:"required"`
+	Image       string `json:"image"`
 	FirstName   string `json:"firstName" binding:"required" validate:"min=2, max=40"`
 	LastName    string `json:"lastName" binding:"required" validate:"min=2, max=40"`
 	MiddleName  string `json:"middleName"`
 	DateOfBirth string `json:"dateOfBirth" binding:"required" validate:"datetime" copier:"-"`
-	UserTypeId  string `json:"userTypeId" binding:"required" validate:"nonzero"`
+	UserTypeId  string `json:"userTypeId"`
 	Gender      string `json:"gender" binding:"required" validate:"nonzero"`
 	PhoneNumber string `json:"phoneNumber"`
 	Address     string `json:"address"`
-	RoleId      string `json:"roleId" binding:"required" validate:"nonzero"`
+	RoleId      string `json:"roleId"`
 }
 
 type UserResult struct {

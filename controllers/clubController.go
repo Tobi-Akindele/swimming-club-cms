@@ -49,7 +49,7 @@ func (cc *ClubController) AddMembers(ctx *gin.Context) {
 		return
 	}
 	serviceManager := services.GetServiceManagerInstance()
-	club, err := serviceManager.GetClubService().AddMember(&newMember)
+	club, err := serviceManager.GetClubService().AddMember(&newMember, ctx)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
@@ -86,5 +86,46 @@ func (cc *ClubController) GetClubByName(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
 		ctx.JSON(http.StatusOK, club)
+	}
+}
+
+func (cc *ClubController) RemoveMembers(ctx *gin.Context) {
+	var removeMembers models.RemoveMembers
+	if err := ctx.ShouldBindJSON(&removeMembers); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+		return
+	}
+	if errs := validator.Validate(removeMembers); errs != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: errs.Error()})
+		return
+	}
+
+	serviceManager := services.GetServiceManagerInstance()
+	club, err := serviceManager.GetClubService().RemoveMembers(&removeMembers, ctx)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+	} else {
+		ctx.JSON(http.StatusCreated, club)
+	}
+}
+
+func (cc *ClubController) UpdateClub(ctx *gin.Context) {
+	clubId := ctx.Param("id")
+	var clubUpdate models.ClubUpdate
+	if err := ctx.ShouldBindJSON(&clubUpdate); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+		return
+	}
+	if errs := validator.Validate(clubUpdate); errs != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: errs.Error()})
+		return
+	}
+	clubUpdate.ClubId = clubId
+	serviceManager := services.GetServiceManagerInstance()
+	updatedClub, err := serviceManager.GetClubService().UpdateClub(&clubUpdate, ctx)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+	} else {
+		ctx.JSON(http.StatusCreated, updatedClub)
 	}
 }

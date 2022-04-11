@@ -77,6 +77,12 @@ func setClubRoutes(router *gin.Engine) {
 	getAllClubsRoute := router.Group("/clubs", middlewares.HasAuthority("GET_ALL_CLUBS"))
 	getAllClubsRoute.GET("", clubController.GetAllClubs)
 
+	removeMemberFromClubRoute := router.Group("/club/remove/members", middlewares.HasAuthority("REMOVE_CLUB_MEMBERS"))
+	removeMemberFromClubRoute.POST("", clubController.RemoveMembers)
+
+	updateClubRoute := router.Group("/club/update/:id", middlewares.HasAuthority("UPDATE_CLUB"))
+	updateClubRoute.PUT("", clubController.UpdateClub)
+
 	router.GET("/club/name", clubController.GetClubByName)
 }
 
@@ -136,6 +142,12 @@ func setUserRoutes(router *gin.Engine) {
 
 	updateUserRoute := router.Group("/user/update/:id", middlewares.HasAuthority("UPDATE_USER"))
 	updateUserRoute.PUT("", userController.UpdateUser)
+
+	userProfileUpdateRoute := router.Group("/user/profile/update/:id", middlewares.HasAuthority("UPDATE_PROFILE_DETAILS"))
+	userProfileUpdateRoute.PUT("", userController.UpdateUser)
+
+	getProfileDetailsRoute := router.Group("/user/:id", middlewares.HasAuthority("GET_PROFILE_DETAILS"))
+	getProfileDetailsRoute.GET("", userController.GetUserById)
 
 	router.GET("/users/search/type", userController.SearchUsersByUserType)
 }

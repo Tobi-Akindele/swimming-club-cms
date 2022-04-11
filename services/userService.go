@@ -114,27 +114,33 @@ func (us *userService) UpdateUser(userUpdate *models.UserUpdate, userId string) 
 	if err != nil {
 		return nil, errors.New("date format does not match yyyy-MM-dd")
 	}
-	userTypeService := GetServiceManagerInstance().GetUserTypeService()
-	userType, err := userTypeService.GetById(userUpdate.UserTypeId)
-	if err != nil {
-		return nil, errors.New("unable to validate user type")
-	} else if !userType.Assignable {
-		return nil, errors.New("user type " + userType.Name + " is not assignable")
+	if len(userUpdate.UserTypeId) > 0 {
+		userTypeService := GetServiceManagerInstance().GetUserTypeService()
+		userType, err := userTypeService.GetById(userUpdate.UserTypeId)
+		if err != nil {
+			return nil, errors.New("unable to validate user type")
+		} else if !userType.Assignable {
+			return nil, errors.New("user type " + userType.Name + " is not assignable")
+		}
+		user.UserType = mogo.RefField{ID: userType.ID}
 	}
-	roleService := GetServiceManagerInstance().GetRoleService()
-	rawRole, err := roleService.GetById(userUpdate.RoleId, false)
-	role, _ := rawRole.(*models.Role)
-	if err != nil {
-		return nil, errors.New("unable to validate role")
-	} else if !role.Assignable {
-		return nil, errors.New("role" + role.Name + " is not assignable")
+	if len(userUpdate.RoleId) > 0 {
+		roleService := GetServiceManagerInstance().GetRoleService()
+		rawRole, err := roleService.GetById(userUpdate.RoleId, false)
+		role, _ := rawRole.(*models.Role)
+		if err != nil {
+			return nil, errors.New("unable to validate role")
+		} else if !role.Assignable {
+			return nil, errors.New("role" + role.Name + " is not assignable")
+		}
+		user.Role = mogo.RefField{ID: role.ID}
 	}
+
 	if err := copier.Copy(&user, &userUpdate); err != nil {
 		log.Println(err)
 	}
 	user.DateOfBirth = parsedDOB
-	user.UserType = mogo.RefField{ID: userType.ID}
-	user.Role = mogo.RefField{ID: role.ID}
+
 	return userRepository.SaveUser(user)
 }
 
