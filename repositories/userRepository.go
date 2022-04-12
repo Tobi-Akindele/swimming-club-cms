@@ -88,8 +88,10 @@ func (ur *userRepository) FindById(id string, fetchRelationShips bool) (interfac
 		var userResult models.UserResult
 		var userType []models.UserType
 		var role []models.Role
+		var children []models.User
 		_ = userDoc.Populate("UserType").Find(bson.M{}).All(&userType)
 		_ = userDoc.Populate("Role").Find(bson.M{}).All(&role)
+		_ = userDoc.Populate("Children").Find(bson.M{}).All(&children)
 		_ = copier.Copy(&userResult, userDoc)
 		if len(userType) > 0 {
 			userResult.UserType = userType[0]
@@ -97,6 +99,7 @@ func (ur *userRepository) FindById(id string, fetchRelationShips bool) (interfac
 		if len(role) > 0 {
 			userResult.Role = role[0]
 		}
+		userResult.Children = children
 		return &userResult, nil
 	}
 	return userDoc, nil
@@ -185,5 +188,19 @@ func (ur *userRepository) FindAllUsersByUsernameAndUserType(username string, use
 	if err != nil {
 		return nil, err
 	}
+	return users, nil
+}
+
+func (ur *userRepository) FindByChildId(childId string) ([]*models.User, error) {
+	conn := db.GetConnection()
+	defer db.CloseConnection(conn)
+
+	userDoc := mogo.NewDoc(models.User{}).(*models.User)
+	var users []*models.User
+	err := userDoc.Find(bson.M{"children._id": bson.ObjectIdHex(childId)}).Q().Sort("-_created").All(&users)
+	if err != nil {
+		return nil, err
+	}
+
 	return users, nil
 }

@@ -166,7 +166,51 @@ func (us *userService) SearchUsersByUserType(username string, userTypeName strin
 		userType, _ = userTypeService.GetByName(utils.COACH)
 	} else if userTypeName == utils.SWIMMER {
 		userType, _ = userTypeService.GetByName(utils.SWIMMER)
+	} else if userTypeName == utils.PARENT {
+		userType, _ = userTypeService.GetByName(utils.PARENT)
+	} else {
+		return nil, errors.New("user type not supported")
 	}
 	userRepository := repositories.GetRepositoryManagerInstance().GetUserRepository()
 	return userRepository.FindAllUsersByUsernameAndUserType(username, userType.ID.Hex())
+}
+
+func (us *userService) AddChild(childRelation *models.AddRelation) (*models.User, error) {
+	if childRelation.ChildId == childRelation.ParentId {
+		return nil, errors.New("operation not allowed")
+	}
+	userRepository := repositories.GetRepositoryManagerInstance().GetUserRepository()
+	serviceManager := GetServiceManagerInstance()
+	userService := serviceManager.GetUserService()
+	userTypeService := serviceManager.GetUserTypeService()
+	rawUser, _ := userRepository.FindById(childRelation.ParentId, false)
+	if rawUser == nil {
+		return nil, errors.New("parent not found")
+	}
+	parent, _ := rawUser.(*models.User)
+	parentType, _ := userTypeService.GetById(parent.UserType.ID.Hex())
+	if utils.PARENT != parentType.Name {
+		return nil, errors.New("relationship must be parent-child")
+	}
+	children := utils.ConvertRefFieldSliceToStringMap(parent.Children)
+
+	rawUser, _ = userService.GetById(childRelation.ChildId, false)
+	if rawUser == nil {
+		return nil, errors.New("all children must be registered")
+	}
+	child, _ := rawUser.(*models.User)
+	swimmerType, _ := userTypeService.GetById(child.UserType.ID.Hex())
+	if utils.SWIMMER != swimmerType.Name {
+		return nil, errors.New("child must be a swimmer")
+	}
+	if !utils.MapContainsKey(children, child.ID.Hex()) {
+		parent.Children = append(parent.Children, &mogo.RefField{ID: child.ID})
+	}
+
+	return userRepository.SaveUser(parent)
+}
+
+func (us *userService) GetUsersByChildId(childId string) ([]*models.User, error) {
+	userRepository := repositories.GetRepositoryManagerInstance().GetUserRepository()
+	return userRepository.FindByChildId(childId)
 }

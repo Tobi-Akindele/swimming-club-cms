@@ -85,7 +85,8 @@ func (uc *UserController) SearchUsersByUserType(ctx *gin.Context) {
 func (uc *UserController) GetUserById(ctx *gin.Context) {
 	userId := ctx.Param("id")
 	serviceManager := services.GetServiceManagerInstance()
-	rawUser, err := serviceManager.GetUserService().GetById(userId, true)
+	userService := serviceManager.GetUserService()
+	rawUser, err := userService.GetById(userId, true)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
@@ -100,6 +101,31 @@ func (uc *UserController) GetUserById(ctx *gin.Context) {
 		} else {
 			user.Club = *club
 		}
+		parents, _ := userService.GetUsersByChildId(user.ID.Hex())
+		user.Parents = parents
 		ctx.JSON(http.StatusOK, rawUser)
+	}
+}
+
+func (uc *UserController) AddChild(ctx *gin.Context) {
+	var child models.AddRelation
+	if err := ctx.ShouldBindJSON(&child); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{
+			Code: http.StatusBadRequest, Message: err.Error(),
+		})
+		return
+	}
+	if errs := validator.Validate(child); errs != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{
+			Code: http.StatusBadRequest, Message: errs.Error(),
+		})
+		return
+	}
+	serviceManager := services.GetServiceManagerInstance()
+	user, err := serviceManager.GetUserService().AddChild(&child)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+	} else {
+		ctx.JSON(http.StatusCreated, user)
 	}
 }

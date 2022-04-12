@@ -132,6 +132,10 @@ func permissions() []*models.Permission {
 			Name:  "UPDATE PROFILE DETAILS",
 			Value: "UPDATE_PROFILE_DETAILS",
 		},
+		{
+			Name:  "LINK CHILD PROFILE",
+			Value: "LINK_CHILD_PROFILE",
+		},
 	}
 	return pList
 }

@@ -21,12 +21,14 @@ func (cb *clubService) CreateClub(clubDto *models.ClubDto) (*models.Club, error)
 	if clubByCoachId != nil {
 		return nil, errors.New("coach is not available")
 	}
-	rawUser, _ := userService.GetById(clubDto.CoachId, true)
+	rawUser, _ := userService.GetById(clubDto.CoachId, false)
 	if rawUser == nil {
 		return nil, errors.New("unable to validate coach")
 	}
-	user, _ := rawUser.(*models.UserResult)
-	if user.UserType.Name != utils.COACH {
+	user, _ := rawUser.(*models.User)
+	userTypeService := serviceManager.GetUserTypeService()
+	userType, _ := userTypeService.GetById(user.UserType.ID.Hex())
+	if utils.COACH != userType.Name {
 		return nil, errors.New("user must be a coach")
 	}
 	err := copier.Copy(&club, clubDto)
@@ -58,13 +60,16 @@ func (cb *clubService) AddMember(newMember *models.AddMember, ctx *gin.Context) 
 	if clubByMemberId != nil {
 		return nil, errors.New("user already belong to a club")
 	}
-	userService := GetServiceManagerInstance().GetUserService()
-	rawUser, _ := userService.GetById(newMember.MemberId, true)
+	serviceManager := GetServiceManagerInstance()
+	userService := serviceManager.GetUserService()
+	rawUser, _ := userService.GetById(newMember.MemberId, false)
 	if rawUser == nil {
 		return nil, errors.New("all members must be registered on the system")
 	}
-	user, _ := rawUser.(*models.UserResult)
-	if user.UserType.Name != utils.SWIMMER {
+	user, _ := rawUser.(*models.User)
+	userTypeService := serviceManager.GetUserTypeService()
+	userType, _ := userTypeService.GetById(user.UserType.ID.Hex())
+	if utils.SWIMMER != userType.Name {
 		return nil, errors.New("all members must be swimmers")
 	}
 	club.Members = append(club.Members, &mogo.RefField{ID: user.ID})
