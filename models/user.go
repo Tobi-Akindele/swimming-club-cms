@@ -11,23 +11,24 @@ func init() {
 
 type User struct {
 	mogo.DocumentModel `bson:",inline" coll:"users"`
-	Username           string        `json:"username" idx:"{username}, unique"`
-	Image              string        `json:"image"`
-	Email              string        `json:"email" idx:"{email}, unique"`
-	FirstName          string        `json:"firstName"`
-	LastName           string        `json:"lastName"`
-	MiddleName         string        `json:"middleName"`
-	Password           string        `json:"password"`
-	DateOfBirth        time.Time     `json:"dateOfBirth"`
-	UserType           mogo.RefField `json:"userType" ref:"UserType"`
-	Admin              bool          `json:"admin"`
-	Gender             string        `json:"gender"`
-	Updatable          bool          `json:"updatable"`
-	PhoneNumber        string        `json:"phoneNumber"`
-	Address            string        `json:"address"`
-	Role               mogo.RefField `json:"role" ref:"Role"`
-	Active             bool          `json:"active"`
-	ActivationCode     string        `json:"activationCode"`
+	Username           string             `json:"username" idx:"{username}, unique"`
+	Image              string             `json:"image"`
+	Email              string             `json:"email" idx:"{email}, unique"`
+	FirstName          string             `json:"firstName"`
+	LastName           string             `json:"lastName"`
+	MiddleName         string             `json:"middleName"`
+	Password           string             `json:"password"`
+	DateOfBirth        time.Time          `json:"dateOfBirth"`
+	UserType           mogo.RefField      `json:"userType" ref:"UserType"`
+	Admin              bool               `json:"admin"`
+	Gender             string             `json:"gender"`
+	Updatable          bool               `json:"updatable"`
+	PhoneNumber        string             `json:"phoneNumber"`
+	Address            string             `json:"address"`
+	Role               mogo.RefField      `json:"role" ref:"Role"`
+	Active             bool               `json:"active"`
+	ActivationCode     string             `json:"activationCode"`
+	Children           mogo.RefFieldSlice `json:"children" ref:"User"`
 }
 
 //goland:noinspection ALL
@@ -83,6 +84,8 @@ type UserResult struct {
 	Time               string    `json:"time"`
 	FinalPoint         int       `json:"finalPoint"`
 	ResultId           string    `json:"resultId"`
+	Parents            []*User   `json:"parents"`
+	Children           []User    `json:"children"`
 }
 
 type Login struct {
@@ -94,4 +97,9 @@ type SetPassword struct {
 	ActivationCode  string `json:"activationCode" binding:"required" validate:"nonzero"`
 	Password        string `json:"password" binding:"required" validate:"nonzero, min=8"`
 	ConfirmPassword string `json:"confirmPassword" binding:"required" validate:"nonzero, min=8"`
+}
+
+type AddRelation struct {
+	ParentId string `json:"parentId" binding:"required" validate:"nonzero"`
+	ChildId  string `json:"childId" binding:"required" validate:"nonzero"`
 }

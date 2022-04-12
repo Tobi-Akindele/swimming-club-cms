@@ -50,10 +50,10 @@ func ComposeAccountActivationEmail(firstName string, activationCode string) stri
 
 			<p>Thank you for joining the Swimming Club CMS. Kindly click the button below to set your password and activate your account.</p>
 
-			<p style="text-align:center;"><a href="%s" target="_blank"" style="text-align:center; padding:10px; background-color:#79a5d9;text-decoration:none; color:white;">Set Password</a></p>
+			<p style="text-align:center;"><a href="%s" target="_blank" style="text-align:center; padding:10px; background-color:#79a5d9;text-decoration:none; color:white;">Set Password</a></p>
 
 			<p>Or follow the link below</p>
-			<p>%s</p>
+			<p><a href="%s" target="_blank">%s</a></p>
 			
 			<p>Thank you.</p>
 			<p></p>
@@ -61,7 +61,7 @@ func ComposeAccountActivationEmail(firstName string, activationCode string) stri
 			<p>Swimming Club CMS Team</p>
 			<p>S405 PC Lab, Mellor Building, Staffordshire University.</p>
 		</body>
-		</html>`, firstName, setPasswordLink, setPasswordLink)
+		</html>`, firstName, setPasswordLink, setPasswordLink, setPasswordLink)
 
 	return htmlBody
 }

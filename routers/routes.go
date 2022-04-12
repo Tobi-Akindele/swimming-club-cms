@@ -149,6 +149,9 @@ func setUserRoutes(router *gin.Engine) {
 	getProfileDetailsRoute := router.Group("/user/:id", middlewares.HasAuthority("GET_PROFILE_DETAILS"))
 	getProfileDetailsRoute.GET("", userController.GetUserById)
 
+	addChildProfileRoute := router.Group("/user/add/child", middlewares.HasAuthority("LINK_CHILD_PROFILE"))
+	addChildProfileRoute.POST("", userController.AddChild)
+
 	router.GET("/users/search/type", userController.SearchUsersByUserType)
 }
 

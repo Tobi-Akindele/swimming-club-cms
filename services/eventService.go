@@ -48,17 +48,19 @@ func (es *eventService) AddParticipant(participant *models.AddParticipant) (*mod
 	}
 	event, _ := rawEvent.(*models.Event)
 	existingParticipants := utils.ConvertRefFieldSliceToStringMap(event.Participants)
-
-	userService := GetServiceManagerInstance().GetUserService()
-	rawUser, _ := userService.GetById(participant.ParticipantId, true)
+	serviceManager := GetServiceManagerInstance()
+	userService := serviceManager.GetUserService()
+	rawUser, _ := userService.GetById(participant.ParticipantId, false)
 	if rawUser == nil {
 		return nil, errors.New("all participants must be registered")
 	}
-	user, _ := rawUser.(*models.UserResult)
+	user, _ := rawUser.(*models.User)
 	if !user.Active {
 		return nil, errors.New("all participants must be active")
 	}
-	if user.UserType.Name != utils.SWIMMER {
+	userTypeService := serviceManager.GetUserTypeService()
+	userType, _ := userTypeService.GetById(user.UserType.ID.Hex())
+	if utils.SWIMMER != userType.Name {
 		return nil, errors.New("all participants must be swimmers")
 	}
 	if !utils.MapContainsKey(existingParticipants, user.ID.Hex()) {
