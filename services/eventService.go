@@ -114,22 +114,29 @@ func (es *eventService) RecordResults(recordResult *models.RecordResult) (*model
 			return nil, errors.New("only registered participants can have result")
 		}
 		var result models.Result
-		existingResult, _ := resultRepository.FindById(resultData.ResultId)
-		if existingResult != nil {
-			result = *existingResult
+		if len(resultData.ResultId) > 0 {
+			existingResult, _ := resultRepository.FindById(resultData.ResultId)
+			if existingResult != nil {
+				result = *existingResult
+			}
 		}
 		result.Time = resultData.Time
 		result.FinalPoint = resultData.FinalPoint
 		result.Participant = mogo.RefField{ID: bson.ObjectIdHex(resultData.ParticipantId)}
 		results = append(results, &result)
 	}
+	requireUpdate := false
 	for _, result := range results {
 		result, err := resultRepository.SaveResult(result)
 		if err == nil {
 			if !utils.MapContainsKey(utils.ConvertRefFieldSliceToStringMap(event.Results), result.ID.Hex()) {
+				requireUpdate = true
 				event.Results = append(event.Results, &mogo.RefField{ID: result.ID})
 			}
 		}
 	}
-	return eventRepository.SaveEvent(event)
+	if requireUpdate {
+		return eventRepository.SaveEvent(event)
+	}
+	return event, nil
 }

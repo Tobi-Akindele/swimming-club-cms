@@ -83,7 +83,11 @@ func setClubRoutes(router *gin.Engine) {
 	updateClubRoute := router.Group("/club/update/:id", middlewares.HasAuthority("UPDATE_CLUB"))
 	updateClubRoute.PUT("", clubController.UpdateClub)
 
+	getClubMembersRoute := router.Group("/club/:id/members", middlewares.HasAuthority("GET_CLUB_BY_ID"))
+	getClubMembersRoute.GET("", clubController.GetClubMembers)
+
 	router.GET("/club/name", clubController.GetClubByName)
+	router.GET("clubs/count", clubController.GetTotalClubs)
 }
 
 func setCompetitionRoutes(router *gin.Engine) {
@@ -105,6 +109,8 @@ func setCompetitionRoutes(router *gin.Engine) {
 	deleteCompetitionEventRoute.POST("", competitionController.RemoveEventFromCompetition)
 
 	router.GET("/competition/name", competitionController.GetByName)
+	router.GET("/competitions/count", competitionController.GetTotalCompetitions)
+	router.GET("/competitions/open/count", competitionController.GetOpenCompetitionsCount)
 }
 
 func setEventRoutes(router *gin.Engine) {
@@ -153,6 +159,23 @@ func setUserRoutes(router *gin.Engine) {
 	addChildProfileRoute.POST("", userController.AddChild)
 
 	router.GET("/users/search/type", userController.SearchUsersByUserType)
+	router.GET("/users/count", userController.GetTotalUsers)
+}
+
+func setTrainingDataRoutes(router *gin.Engine) {
+	trainingDataController := new(controllers.TrainingDataController)
+
+	createTrainingDataRoute := router.Group("/training-data", middlewares.HasAuthority("CREATE_TRAINING_DATA"))
+	createTrainingDataRoute.POST("", trainingDataController.CreateTrainingData)
+
+	getTrainingDataByIdRoute := router.Group("/training-data/:id", middlewares.HasAuthority("GET_TRAINING_DATA_BY_ID"))
+	getTrainingDataByIdRoute.GET("", trainingDataController.GeTrainingDataById)
+
+	addTDParticipantsRoute := router.Group("/training-data/add/participants", middlewares.HasAuthority("CREATE_TRAINING_DATA"))
+	addTDParticipantsRoute.POST("", trainingDataController.AddParticipants)
+
+	recordTDResultRoute := router.Group("/training-data/results", middlewares.HasAuthority("CREATE_TRAINING_DATA"))
+	recordTDResultRoute.POST("", trainingDataController.RecordTDResults)
 }
 
 func HandleRequests() *gin.Engine {
@@ -171,6 +194,7 @@ func HandleRequests() *gin.Engine {
 	setCompetitionRoutes(router)
 	setEventRoutes(router)
 	setUserRoutes(router)
+	setTrainingDataRoutes(router)
 
 	return router
 }

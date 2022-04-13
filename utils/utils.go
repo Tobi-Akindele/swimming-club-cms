@@ -42,10 +42,10 @@ func contains(elements []string, str string) bool {
 	return false
 }
 
-func ConvertRefFieldSliceToStringSlice(refFieldSlice mogo.RefFieldSlice) []string {
-	result := make([]string, len(refFieldSlice))
-	for refIdx := range refFieldSlice {
-		result[refIdx] = refFieldSlice[refIdx].ID.Hex()
+func ConvertRefFieldSliceToMap(refFieldSlice mogo.RefFieldSlice) map[string]int {
+	result := make(map[string]int, len(refFieldSlice))
+	for k, refField := range refFieldSlice {
+		result[refField.ID.Hex()] = k
 	}
 	return result
 }
@@ -59,10 +59,15 @@ func MapContainsKey(iMap map[string]string, key string) bool {
 	return ok
 }
 
+func MapContainsKey1(iMap map[string]int, key string) bool {
+	_, ok := iMap[key]
+	return ok
+}
+
 func ConvertPermissionSliceToMap(permissionsSrc []models.Permission) map[string]string {
-	permissions := map[string]string{}
-	for i := range permissionsSrc {
-		permissions[permissionsSrc[i].Value] = permissionsSrc[i].Name
+	permissions := make(map[string]string, len(permissionsSrc))
+	for _, permission := range permissionsSrc {
+		permissions[permission.Value] = permission.Name
 	}
 	return permissions
 }
@@ -80,6 +85,6 @@ func IsAdmin(ctx *gin.Context) (*models.User, bool) {
 		user, _ := rawUser.(*models.User)
 		return user, user.Admin
 	}
-	//Ideally the line is unreachable
+	//Ideally this line is unreachable
 	return nil, false
 }

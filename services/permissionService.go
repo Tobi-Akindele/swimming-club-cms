@@ -29,3 +29,8 @@ func (ps *permissionService) GetById(id string) (*models.Permission, error) {
 	permissionRepository := repositories.GetRepositoryManagerInstance().GetPermissionRepository()
 	return permissionRepository.FindById(id)
 }
+
+func (ps *permissionService) GetByValue(value string) (*models.Permission, error) {
+	permissionRepository := repositories.GetRepositoryManagerInstance().GetPermissionRepository()
+	return permissionRepository.FindByValue(value)
+}

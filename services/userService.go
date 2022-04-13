@@ -214,3 +214,8 @@ func (us *userService) GetUsersByChildId(childId string) ([]*models.User, error)
 	userRepository := repositories.GetRepositoryManagerInstance().GetUserRepository()
 	return userRepository.FindByChildId(childId)
 }
+
+func (us *userService) GetTotalUsers() (*int, error) {
+	userRepository := repositories.GetRepositoryManagerInstance().GetUserRepository()
+	return userRepository.FindAllUserCount()
+}

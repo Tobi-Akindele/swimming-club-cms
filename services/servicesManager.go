@@ -5,14 +5,15 @@ import "sync"
 var lock = &sync.Mutex{}
 
 type serviceManager struct {
-	authService        *authService
-	clubService        *clubService
-	competitionService *competitionService
-	eventService       *eventService
-	permissionService  *permissionService
-	roleService        *roleService
-	userService        *userService
-	userTypeService    *userTypeService
+	authService         *authService
+	clubService         *clubService
+	competitionService  *competitionService
+	eventService        *eventService
+	permissionService   *permissionService
+	roleService         *roleService
+	userService         *userService
+	userTypeService     *userTypeService
+	trainingDataService *trainingDataService
 }
 
 var instance *serviceManager
@@ -82,4 +83,11 @@ func (sm *serviceManager) GetUserTypeService() *userTypeService {
 		sm.userTypeService = &userTypeService{}
 	}
 	return sm.userTypeService
+}
+
+func (sm *serviceManager) GetTrainingDataService() *trainingDataService {
+	if sm.trainingDataService == nil {
+		sm.trainingDataService = &trainingDataService{}
+	}
+	return sm.trainingDataService
 }

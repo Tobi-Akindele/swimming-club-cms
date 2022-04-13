@@ -66,3 +66,13 @@ func (cs *competitionService) RemoveEventFromCompetition(removeEvents *models.Re
 	competition.Events = utils.RemoveRefFromRefSlice(competition.Events, removeEvents.EventIds)
 	return competitionRepository.SaveCompetition(competition)
 }
+
+func (cs *competitionService) GetTotalCompetitions() (*int, error) {
+	competitionRepository := repositories.GetRepositoryManagerInstance().GetCompetitionRepository()
+	return competitionRepository.FindAllCompetitionsCount()
+}
+
+func (cs *competitionService) GetOpenCompetitionsCount() (*int, error) {
+	competitionRepository := repositories.GetRepositoryManagerInstance().GetCompetitionRepository()
+	return competitionRepository.FindAllOpenCompetitionsCount()
+}

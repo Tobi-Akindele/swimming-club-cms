@@ -60,3 +60,15 @@ func (pr *permissionRepository) FindById(id string) (*models.Permission, error) 
 	}
 	return permissionDoc, nil
 }
+
+func (pr *permissionRepository) FindByValue(value string) (*models.Permission, error) {
+	conn := db.GetConnection()
+	defer db.CloseConnection(conn)
+
+	permissionDoc := mogo.NewDoc(models.Permission{}).(*models.Permission)
+	err := permissionDoc.FindOne(bson.M{"value": value}, permissionDoc)
+	if err != nil {
+		return nil, err
+	}
+	return permissionDoc, nil
+}

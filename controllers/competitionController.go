@@ -110,3 +110,23 @@ func (cc *CompetitionController) RemoveEventFromCompetition(ctx *gin.Context) {
 		ctx.JSON(http.StatusCreated, competition)
 	}
 }
+
+func (cc *CompetitionController) GetTotalCompetitions(ctx *gin.Context) {
+	serviceManager := services.GetServiceManagerInstance()
+	total, err := serviceManager.GetCompetitionService().GetTotalCompetitions()
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+	} else {
+		ctx.JSON(http.StatusOK, dtos.Response{Code: http.StatusBadRequest, Message: "", Count: *total})
+	}
+}
+
+func (cc *CompetitionController) GetOpenCompetitionsCount(ctx *gin.Context) {
+	serviceManager := services.GetServiceManagerInstance()
+	total, err := serviceManager.GetCompetitionService().GetOpenCompetitionsCount()
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+	} else {
+		ctx.JSON(http.StatusOK, dtos.Response{Code: http.StatusBadRequest, Message: "", Count: *total})
+	}
+}

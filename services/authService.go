@@ -13,9 +13,9 @@ type authService struct{}
 
 func (as *authService) AuthenticateUser(login *models.Login) (*dtos.AuthResponse, error) {
 	userService := GetServiceManagerInstance().GetUserService()
-	user, err := userService.GetByUsername(login.Username)
-	if err != nil {
-		return nil, err
+	user, _ := userService.GetByUsername(login.Username)
+	if user == nil {
+		return nil, errors.New("user not found")
 	}
 	if !user.Active {
 		return nil, errors.New("kindly activate your account")

@@ -52,7 +52,7 @@ func (cb *clubService) AddMember(newMember *models.AddMember, ctx *gin.Context) 
 	}
 	club, _ := rawClub.(*models.Club)
 	if requester, isAdmin := utils.IsAdmin(ctx); !isAdmin {
-		if requester.ID.Hex() != club.ID.Hex() {
+		if requester.ID.Hex() != club.Coach.ID.Hex() {
 			return nil, errors.New("action not allowed")
 		}
 	}
@@ -96,7 +96,7 @@ func (cb *clubService) RemoveMembers(removeMembers *models.RemoveMembers, ctx *g
 
 	club, _ := rawClub.(*models.Club)
 	if requester, isAdmin := utils.IsAdmin(ctx); !isAdmin {
-		if requester.ID.Hex() != club.ID.Hex() {
+		if requester.ID.Hex() != club.Coach.ID.Hex() {
 			return nil, errors.New("action not allowed")
 		}
 	}
@@ -113,7 +113,7 @@ func (cb *clubService) UpdateClub(clubUpdate *models.ClubUpdate, ctx *gin.Contex
 	}
 	club, _ := rawClub.(*models.Club)
 	if requester, isAdmin := utils.IsAdmin(ctx); !isAdmin {
-		if requester.ID.Hex() != club.ID.Hex() {
+		if requester.ID.Hex() != club.Coach.ID.Hex() {
 			return nil, errors.New("action not allowed")
 		}
 	}
@@ -137,4 +137,14 @@ func (cb *clubService) GetByMemberId(memberId string) (*models.Club, error) {
 func (cb *clubService) GetByCoachId(coachId string) (*models.Club, error) {
 	clubRepository := repositories.GetRepositoryManagerInstance().GetClubRepository()
 	return clubRepository.FindByCoachId(coachId)
+}
+
+func (cb *clubService) GetMembers(clubId string) ([]*models.User, error) {
+	clubRepository := repositories.GetRepositoryManagerInstance().GetClubRepository()
+	return clubRepository.FindByClubMembers(clubId)
+}
+
+func (cb *clubService) GetTotalClubs() (*int, error) {
+	clubRepository := repositories.GetRepositoryManagerInstance().GetClubRepository()
+	return clubRepository.FindAllClubCount()
 }

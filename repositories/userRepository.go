@@ -204,3 +204,16 @@ func (ur *userRepository) FindByChildId(childId string) ([]*models.User, error) 
 
 	return users, nil
 }
+
+func (ur *userRepository) FindAllUserCount() (*int, error) {
+	conn := db.GetConnection()
+	defer db.CloseConnection(conn)
+
+	userDoc := mogo.NewDoc(models.User{}).(*models.User)
+	count, err := userDoc.Find(nil).Q().Count()
+	if err != nil {
+		return nil, err
+	}
+
+	return &count, nil
+}

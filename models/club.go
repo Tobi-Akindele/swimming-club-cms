@@ -30,9 +30,10 @@ type RemoveMembers struct {
 
 type ClubResult struct {
 	mogo.DocumentModel `bson:",inline"`
-	Name               string `json:"name"`
-	Coach              User   `json:"coach"`
-	Members            []User `json:"members"`
+	Name               string      `json:"name"`
+	Coach              User        `json:"coach"`
+	Members            []User      `json:"members"`
+	TrainingData       interface{} `json:"trainingData"`
 }
 
 type ClubUpdate struct {

@@ -60,10 +60,14 @@ func (cc *ClubController) AddMembers(ctx *gin.Context) {
 func (cc *ClubController) GetClubById(ctx *gin.Context) {
 	clubId := ctx.Param("id")
 	serviceManager := services.GetServiceManagerInstance()
-	club, err := serviceManager.GetClubService().GetById(clubId, true)
+	rawClub, err := serviceManager.GetClubService().GetById(clubId, true)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
+		club, _ := rawClub.(*models.ClubResult)
+		trainingDataService := serviceManager.GetTrainingDataService()
+		trainingData, _ := trainingDataService.GetByClubId(club.ID.Hex())
+		club.TrainingData = trainingData
 		ctx.JSON(http.StatusOK, club)
 	}
 }
@@ -127,5 +131,26 @@ func (cc *ClubController) UpdateClub(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
 	} else {
 		ctx.JSON(http.StatusCreated, updatedClub)
+	}
+}
+
+func (cc *ClubController) GetClubMembers(ctx *gin.Context) {
+	clubId := ctx.Param("id")
+	serviceManager := services.GetServiceManagerInstance()
+	clubMembers, err := serviceManager.GetClubService().GetMembers(clubId)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+	} else {
+		ctx.JSON(http.StatusOK, clubMembers)
+	}
+}
+
+func (cc *ClubController) GetTotalClubs(ctx *gin.Context) {
+	serviceManager := services.GetServiceManagerInstance()
+	total, err := serviceManager.GetClubService().GetTotalClubs()
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+	} else {
+		ctx.JSON(http.StatusOK, dtos.Response{Code: http.StatusBadRequest, Message: "", Count: *total})
 	}
 }

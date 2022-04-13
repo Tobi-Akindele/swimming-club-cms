@@ -6,6 +6,7 @@ import (
 	"github.com/jinzhu/copier"
 	"swimming-club-cms-be/configs/db"
 	"swimming-club-cms-be/models"
+	"time"
 )
 
 type competitionRepository struct{}
@@ -94,4 +95,29 @@ func (cr *competitionRepository) DeleteCompetitions(deletions []*models.Competit
 		return errors
 	}
 	return nil
+}
+
+func (cr *competitionRepository) FindAllCompetitionsCount() (*int, error) {
+	conn := db.GetConnection()
+	defer db.CloseConnection(conn)
+
+	competitionDoc := mogo.NewDoc(models.Competition{}).(*models.Competition)
+	count, err := competitionDoc.Find(nil).Q().Count()
+	if err != nil {
+		return nil, err
+	}
+
+	return &count, nil
+}
+
+func (cr *competitionRepository) FindAllOpenCompetitionsCount() (*int, error) {
+	conn := db.GetConnection()
+	defer db.CloseConnection(conn)
+
+	competitionDoc := mogo.NewDoc(models.Competition{}).(*models.Competition)
+	count, err := competitionDoc.Find(bson.M{"date": bson.M{"$gte": time.Now()}}).Q().Count()
+	if err != nil {
+		return nil, err
+	}
+	return &count, nil
 }
