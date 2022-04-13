@@ -12,13 +12,20 @@ type Result struct {
 	Time               string        `json:"time"`
 	FinalPoint         int           `json:"finalPoint"`
 }
+
 type RecordResult struct {
 	EventId string       `json:"eventId" binding:"required"`
 	Results []ResultData `json:"results" binding:"required"`
 }
+
 type ResultData struct {
 	ParticipantId string `json:"participantId" binding:"required"`
 	ResultId      string `json:"resultId"`
 	Time          string `json:"time" binding:"required"`
 	FinalPoint    int    `json:"finalPoint" binding:"required"`
+}
+
+type RecordTDResult struct {
+	TrainingDataId string       `json:"trainingDataId" binding:"required"`
+	Results        []ResultData `json:"results" binding:"required"`
 }

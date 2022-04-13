@@ -111,3 +111,31 @@ func (cr *clubRepository) FindByCoachId(coachId string) (*models.Club, error) {
 	}
 	return clubDoc, nil
 }
+
+func (cr *clubRepository) FindByClubMembers(id string) ([]*models.User, error) {
+	conn := db.GetConnection()
+	defer db.CloseConnection(conn)
+
+	clubDoc := mogo.NewDoc(models.Club{}).(*models.Club)
+	err := clubDoc.FindOne(bson.M{"_id": bson.ObjectIdHex(id)}, clubDoc)
+	if err != nil {
+		return nil, err
+	}
+	var members []*models.User
+	_ = clubDoc.Populate("Members").Find(bson.M{}).All(&members)
+
+	return members, nil
+}
+
+func (cr *clubRepository) FindAllClubCount() (*int, error) {
+	conn := db.GetConnection()
+	defer db.CloseConnection(conn)
+
+	clubDoc := mogo.NewDoc(models.Club{}).(*models.Club)
+	count, err := clubDoc.Find(nil).Q().Count()
+	if err != nil {
+		return nil, err
+	}
+
+	return &count, nil
+}

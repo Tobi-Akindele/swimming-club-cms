@@ -5,14 +5,15 @@ import "sync"
 var lock = &sync.Mutex{}
 
 type repositoryManager struct {
-	clubRepository        *clubRepository
-	competitionRepository *competitionRepository
-	eventRepository       *eventRepository
-	permissionRepository  *permissionRepository
-	roleRepository        *roleRepository
-	userRepository        *userRepository
-	userTypeRepository    *userTypeRepository
-	resultRepository      *resultRepository
+	clubRepository         *clubRepository
+	competitionRepository  *competitionRepository
+	eventRepository        *eventRepository
+	permissionRepository   *permissionRepository
+	roleRepository         *roleRepository
+	userRepository         *userRepository
+	userTypeRepository     *userTypeRepository
+	resultRepository       *resultRepository
+	trainingDataRepository *trainingDataRepository
 }
 
 var instance *repositoryManager
@@ -82,4 +83,11 @@ func (rm *repositoryManager) GetResultRepository() *resultRepository {
 		rm.resultRepository = &resultRepository{}
 	}
 	return rm.resultRepository
+}
+
+func (rm *repositoryManager) GetTrainingDataRepository() *trainingDataRepository {
+	if rm.trainingDataRepository == nil {
+		rm.trainingDataRepository = &trainingDataRepository{}
+	}
+	return rm.trainingDataRepository
 }

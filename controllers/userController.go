@@ -129,3 +129,13 @@ func (uc *UserController) AddChild(ctx *gin.Context) {
 		ctx.JSON(http.StatusCreated, user)
 	}
 }
+
+func (uc *UserController) GetTotalUsers(ctx *gin.Context) {
+	serviceManager := services.GetServiceManagerInstance()
+	total, err := serviceManager.GetUserService().GetTotalUsers()
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, dtos.Response{Code: http.StatusBadRequest, Message: err.Error()})
+	} else {
+		ctx.JSON(http.StatusOK, dtos.Response{Code: http.StatusBadRequest, Message: "", Count: *total})
+	}
+}

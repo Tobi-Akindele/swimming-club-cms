@@ -136,6 +136,14 @@ func permissions() []*models.Permission {
 			Name:  "LINK CHILD PROFILE",
 			Value: "LINK_CHILD_PROFILE",
 		},
+		{
+			Name:  "CREATE TRAINING DATA",
+			Value: "CREATE_TRAINING_DATA",
+		},
+		{
+			Name:  "GET TRAINING DATA BY ID",
+			Value: "GET_TRAINING_DATA_BY_ID",
+		},
 	}
 	return pList
 }
